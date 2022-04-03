@@ -250,7 +250,7 @@ ___TEMPLATE_PARAMETERS___
     ]
   },
   {
-    "displayName": "Default Event Data Override",
+    "displayName": "Event Data",
     "name": "defaultEventDataListGroup",
     "groupStyle": "ZIPPY_CLOSED",
     "type": "GROUP",
@@ -260,25 +260,6 @@ ___TEMPLATE_PARAMETERS___
         "name": "eventId",
         "displayName": "Event ID",
         "simpleValueType": true
-      },
-      {
-        "type": "TEXT",
-        "name": "firebaseProjectId",
-        "displayName": "Firebase Project ID",
-        "simpleValueType": true
-      },
-      {
-        "type": "TEXT",
-        "name": "firebasePath",
-        "displayName": "Firebase Path",
-        "simpleValueType": true,
-        "help": "The tag uses Firebase to store the OAuth access token. You can choose any key for a document that will store the Snapchat OAuth access token.",
-        "valueValidators": [
-          {
-            "type": "NON_EMPTY"
-          }
-        ],
-        "defaultValue": "stape/snapchat-auth"
       },
       {
         "type": "TEXT",
@@ -418,6 +399,33 @@ ___TEMPLATE_PARAMETERS___
         "newRowButtonText": "Add property"
       }
     ]
+  },
+  {
+    "type": "GROUP",
+    "name": "firebaseGroup",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "TEXT",
+        "name": "firebaseProjectId",
+        "displayName": "Firebase Project ID",
+        "simpleValueType": true
+      },
+      {
+        "type": "TEXT",
+        "name": "firebasePath",
+        "displayName": "Firebase Path",
+        "simpleValueType": true,
+        "help": "The tag uses Firebase to store the OAuth access token. You can choose any key for a document that will store the Snapchat OAuth access token.",
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ],
+        "defaultValue": "stape/snapchat-auth"
+      }
+    ],
+    "displayName": "Firebase Settings"
   },
   {
     "displayName": "Logs Settings",
