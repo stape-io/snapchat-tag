@@ -1,4 +1,6 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 13fa6f60681d0778171f050d5589c27077218b3a
+    changeNotes: Update tag layout.
   - sha: 19ee243e6be2ffa36ef901f183467a8598ff050e
     changeNotes: Initial release.
