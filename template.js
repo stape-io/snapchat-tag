@@ -261,8 +261,8 @@ function addPropertiesData(eventData, mappedData) {
         mappedData.item_ids = items.join(';');
     }
 
-    if (data.mappedData) {
-        data.mappedData.forEach(d => {
+    if (data.customDataList) {
+        data.customDataList.forEach(d => {
             mappedData[d.name] = d.value;
         });
     }
@@ -277,8 +277,8 @@ function addUserData(eventData, mappedData) {
     if (eventData.phone) mappedData.hashed_phone_number = eventData.phone;
     else if (eventData.user_data && eventData.user_data.phone_number) mappedData.hashed_phone_number = eventData.user_data.phone_number;
 
-    if (data.mappedData) {
-        data.mappedData.forEach(d => {
+    if (data.userDataList) {
+        data.userDataList.forEach(d => {
             mappedData[d.name] = d.value;
         });
     }

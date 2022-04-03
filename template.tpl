@@ -220,7 +220,7 @@ ___TEMPLATE_PARAMETERS___
     "name": "refreshToken",
     "displayName": "API Refresh Token",
     "simpleValueType": true,
-    "help": "More info on how to get Authentication credentials \u003ca target\u003d\"_blank\" href\u003d\"https://marketingapi.snapchat.com/docs/#authentication\"\u003ecan be found by this link\u003c/a\u003e.",
+    "help": "More info on how to get Authentication credentials \u003ca target\u003d\"_blank\" href\u003d\"https://stape.io/blog/snapchat-conversion-api-using-server-google-tag-manager\"\u003ecan be found by this link\u003c/a\u003e.",
     "valueValidators": [
       {
         "type": "NON_EMPTY"
@@ -723,8 +723,8 @@ function addPropertiesData(eventData, mappedData) {
         mappedData.item_ids = items.join(';');
     }
 
-    if (data.mappedData) {
-        data.mappedData.forEach(d => {
+    if (data.customDataList) {
+        data.customDataList.forEach(d => {
             mappedData[d.name] = d.value;
         });
     }
@@ -739,8 +739,8 @@ function addUserData(eventData, mappedData) {
     if (eventData.phone) mappedData.hashed_phone_number = eventData.phone;
     else if (eventData.user_data && eventData.user_data.phone_number) mappedData.hashed_phone_number = eventData.user_data.phone_number;
 
-    if (data.mappedData) {
-        data.mappedData.forEach(d => {
+    if (data.userDataList) {
+        data.userDataList.forEach(d => {
             mappedData[d.name] = d.value;
         });
     }
