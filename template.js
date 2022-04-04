@@ -107,7 +107,6 @@ function updateAccessToken(refreshToken) {
                 'EventName': 'Auth',
                 'ResponseStatusCode': statusCode,
                 'ResponseHeaders': headers,
-                'ResponseBody': body,
             }));
         }
 
