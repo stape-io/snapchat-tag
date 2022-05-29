@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 5bc880ed34ea8d026a812ddab7bc5a4c9d077bf2
+    changeNotes: Update auth flow.
   - sha: 04b175f3f998f4a805a3a54a2cc101d2cdffee45
     changeNotes: Hide Auth info from logs.
   - sha: be8b50272679631244affa869d178ed11207ea3f
