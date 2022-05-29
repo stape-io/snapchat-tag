@@ -10,9 +10,7 @@ const sha256Sync = require('sha256Sync');
 const makeString = require('makeString');
 const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
-const encodeUriComponent = require('encodeUriComponent');
 const Math = require('Math');
-const Firestore = require('Firestore');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -24,17 +22,9 @@ const eventData = getAllEventData();
 let scid = getCookieValues('_scid')[0];
 if (!scid) scid = eventData._scid;
 
-let postBody = mapEvent(eventData, data);
+sendTrackRequest(mapEvent(eventData, data));
 
-let firebaseOptions = {};
-if (data.firebaseProjectId) firebaseOptions.projectId = data.firebaseProjectId;
-
-Firestore.read(data.firebasePath, firebaseOptions)
-    .then((result) => {
-        return sendTrackRequest(result.data.access_token, result.data.refresh_token);
-    }, () => updateAccessToken(data.refreshToken));
-
-function sendTrackRequest(accessToken, refreshToken) {
+function sendTrackRequest(postBody) {
     const postUrl = 'https://tr.snapchat.com/v2/conversion';
 
     if (isLoggingEnabled) {
@@ -75,52 +65,10 @@ function sendTrackRequest(accessToken, refreshToken) {
             }
 
             data.gtmOnSuccess();
-        } else if (statusCode === 401) {
-            updateAccessToken(refreshToken);
         } else {
             data.gtmOnFailure();
         }
-    }, {headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken}, method: 'POST'}, JSON.stringify(postBody));
-}
-
-function updateAccessToken(refreshToken) {
-    const authUrl = 'https://accounts.snapchat.com/login/oauth2/access_token';
-    const authBody = 'refresh_token='+enc(refreshToken || data.refreshToken)+'&client_id='+enc(data.clientId)+'&client_secret='+enc(data.clientSecret)+'&grant_type=refresh_token';
-
-    if (isLoggingEnabled) {
-        logToConsole(JSON.stringify({
-            'Name': 'Snapchat',
-            'Type': 'Request',
-            'TraceId': traceId,
-            'EventName': 'Auth',
-            'RequestMethod': 'POST',
-            'RequestUrl': authUrl,
-        }));
-    }
-
-    sendHttpRequest(authUrl, (statusCode, headers, body) => {
-        if (isLoggingEnabled) {
-            logToConsole(JSON.stringify({
-                'Name': 'Snapchat',
-                'Type': 'Response',
-                'TraceId': traceId,
-                'EventName': 'Auth',
-                'ResponseStatusCode': statusCode,
-                'ResponseHeaders': headers,
-            }));
-        }
-
-        if (statusCode >= 200 && statusCode < 400) {
-            let bodyParsed = JSON.parse(body);
-
-            Firestore.write(data.firebasePath, bodyParsed, firebaseOptions)
-                .then((id) => {
-                    sendTrackRequest(bodyParsed.access_token, bodyParsed.refresh_token);
-                }, data.gtmOnFailure);
-        } else {
-            data.gtmOnFailure();
-        }
-    }, {headers: {'Content-Type': 'application/x-www-form-urlencoded'}, method: 'POST'}, authBody);
+    }, {headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + data.apiToken}, method: 'POST'}, JSON.stringify(postBody));
 }
 
 function getEventName(eventData, data) {
@@ -299,9 +247,4 @@ function determinateIsLoggingEnabled() {
     }
 
     return data.logType === 'always';
-}
-
-function enc(data) {
-    data = data || '';
-    return encodeUriComponent(data);
 }
