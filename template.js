@@ -11,6 +11,7 @@ const makeString = require('makeString');
 const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const Math = require('Math');
+const generateRandom = require('generateRandom');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -18,9 +19,6 @@ const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
 
 const eventData = getAllEventData();
-
-let scid = getCookieValues('_scid')[0];
-if (!scid) scid = eventData._scid;
 
 sendTrackRequest(mapEvent(eventData, data));
 
@@ -53,14 +51,14 @@ function sendTrackRequest(postBody) {
         }
 
         if (statusCode >= 200 && statusCode < 400) {
-            if (scid) {
-                setCookie('_scid', scid, {
+            if (postBody.uuid_c1) {
+                setCookie('_scid', postBody.uuid_c1, {
                     domain: 'auto',
                     path: '/',
                     samesite: 'Lax',
                     secure: true,
                     'max-age': 31536000, // 1 year
-                    httpOnly: false
+                    httpOnly: !!data.useHttpOnlyCookie
                 });
             }
 
@@ -78,15 +76,17 @@ function getEventName(eventData, data) {
         let gaToEventName = {
             'page_view': 'PAGE_VIEW',
             "gtm.dom": "PAGE_VIEW",
-            'add_payment_info': 'ADD_BILLING',
             'add_to_cart': 'ADD_CART',
-            'add_to_wishlist': 'ADD_TO_WISHLIST',
             'sign_up': 'SIGN_UP',
-            'begin_checkout': 'START_CHECKOUT',
-            'generate_lead': 'CUSTOM_EVENT_1',
             'purchase': 'PURCHASE',
-            'search': 'SEARCH',
             'view_item': 'VIEW_CONTENT',
+            'add_to_wishlist': 'ADD_TO_WISHLIST',
+            'begin_checkout': 'START_CHECKOUT',
+            'add_payment_info': 'ADD_BILLING',
+            'view_item_list': 'LIST_VIEW',
+            'tutorial_complete': 'COMPLETE_TUTORIAL',
+            'search': 'SEARCH',
+            'generate_lead': 'SIGN_UP',
 
             'contact': 'CUSTOM_EVENT_2',
             'customize_product': 'CUSTOM_EVENT_3',
@@ -124,11 +124,13 @@ function mapEvent(eventData, data) {
         "timestamp": Math.round(getTimestampMillis() / 1000),
         "page_url": eventData.page_location || getRequestHeader('referer'),
         "user_agent": eventData.user_agent,
-        "hashed_ip_address": eventData.ip_override
+        "hashed_ip_address": eventData.ip_override,
+        "integration": "gtmss",
+        "uuid_c1": getSCID()
     };
 
-    if (scid) mappedData.uuid_c1 = scid;
     if (data.eventId) mappedData.client_dedup_id = data.eventId;
+    else if (eventData.client_dedup_id) mappedData.client_dedup_id = eventData.client_dedup_id;
 
     mappedData = addUserData(eventData, mappedData);
     mappedData = addPropertiesData(eventData, mappedData);
@@ -187,10 +189,20 @@ function addPropertiesData(eventData, mappedData) {
     if (eventData.item_category) mappedData.item_category = eventData.item_category;
     else if (eventData.category) mappedData.item_category = eventData.category;
 
+    if (eventData.query) mappedData.search_string = eventData.query;
+    else if (eventData.search_string) mappedData.search_string = eventData.search_string;
+
     if (eventData.transaction_id) mappedData.transaction_id = eventData.transaction_id;
     if (eventData.currency) mappedData.currency = eventData.currency;
     if (eventData.description) mappedData.description = eventData.description;
-    if (eventData.query) mappedData.search_string = eventData.query;
+
+    if (eventData.event_tag) mappedData.event_tag = eventData.event_tag;
+    if (eventData.item_ids) mappedData.item_ids = eventData.item_ids;
+    if (eventData.number_items) mappedData.number_items = eventData.number_items;
+    if (eventData.price) mappedData.price = eventData.price;
+    if (eventData.level) mappedData.level = eventData.level;
+    if (eventData.data_use) mappedData.data_use = eventData.data_use;
+    if (eventData.sign_up_method) mappedData.sign_up_method = eventData.sign_up_method;
 
 
     if (eventData.items && eventData.items[0]) {
@@ -247,4 +259,35 @@ function determinateIsLoggingEnabled() {
     }
 
     return data.logType === 'always';
+}
+
+function createUUID() {
+    let len = 36;
+    let chars = '0123456789abcdef'.split('');
+    let uuid = "";
+
+    for (var i = 0; i < len; i++) {
+        if (i == 8 || i == 13 || i == 18 || i == 23) {
+            uuid += '-';
+        } else if (i == 14) {
+            uuid += '4';
+        } else {
+            uuid += chars[generateRandom(0, chars.length-1)];
+        }
+    }
+    return uuid;
+}
+
+function getSCID() {
+    const scidCookie = getCookieValues('_scid')[0];
+
+    if (scidCookie) {
+        return scidCookie;
+    }
+
+    if (eventData._scid) {
+        return eventData._scid;
+    }
+
+    return createUUID();
 }
