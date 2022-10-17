@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: a75d7ead1d6e391b02f17e2d14efe51d6879c219
+    changeNotes: Add search_term parsing.
   - sha: 21b589f8e2c7ab8bdf843eb6a2c87bf350bc247c
     changeNotes: Add SCID generation.
   - sha: 5bc880ed34ea8d026a812ddab7bc5a4c9d077bf2
