@@ -189,7 +189,8 @@ function addPropertiesData(eventData, mappedData) {
     if (eventData.item_category) mappedData.item_category = eventData.item_category;
     else if (eventData.category) mappedData.item_category = eventData.category;
 
-    if (eventData.query) mappedData.search_string = eventData.query;
+    if (eventData.search_term) mappedData.search_string = eventData.search_term;
+    else if (eventData.query) mappedData.search_string = eventData.query;
     else if (eventData.search_string) mappedData.search_string = eventData.search_string;
 
     if (eventData.transaction_id) mappedData.transaction_id = eventData.transaction_id;
