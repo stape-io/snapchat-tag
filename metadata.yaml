@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 6499e8440fe702c467edcd7eefd7129b48e536ca
+    changeNotes: Added validate request control
   - sha: a75d7ead1d6e391b02f17e2d14efe51d6879c219
     changeNotes: Add search_term parsing.
   - sha: 21b589f8e2c7ab8bdf843eb6a2c87bf350bc247c
