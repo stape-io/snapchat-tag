@@ -15,7 +15,6 @@ const generateRandom = require('generateRandom');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
-const isPreview = containerVersion.previewMode;
 const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
 
@@ -25,7 +24,7 @@ sendTrackRequest(mapEvent(eventData, data));
 
 function sendTrackRequest(postBody) {
   let postUrl = 'https://tr.snapchat.com/v2/conversion';
-  if(isPreview){
+  if (data.validate) {
     postUrl = postUrl + '/validate';
   }
 
