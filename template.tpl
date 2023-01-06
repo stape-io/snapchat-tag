@@ -235,6 +235,13 @@ ___TEMPLATE_PARAMETERS___
     "help": "Forbids JavaScript from accessing the cookie if enabled."
   },
   {
+    "type": "CHECKBOX",
+    "name": "validate",
+    "checkboxText": "Validate CAPI events",
+    "simpleValueType": true,
+    "help": "If enabled conversion request will be sent to /conversion/validate \u003ca href\u003d\"https://businesshelp.snapchat.com/s/article/capi-event-testing?language\u003den_US\"\u003emore info\u003c/a\u003e"
+  },
+  {
     "displayName": "Event Data",
     "name": "defaultEventDataListGroup",
     "groupStyle": "ZIPPY_CLOSED",
@@ -443,7 +450,10 @@ const eventData = getAllEventData();
 sendTrackRequest(mapEvent(eventData, data));
 
 function sendTrackRequest(postBody) {
-  const postUrl = 'https://tr.snapchat.com/v2/conversion';
+  let postUrl = 'https://tr.snapchat.com/v2/conversion';
+  if(data.validate){
+    postUrl = postUrl + '/validate';
+  }
 
   if (isLoggingEnabled) {
     logToConsole(
@@ -744,7 +754,6 @@ function getSCID() {
 
   return createUUID();
 }
-
 
 
 ___SERVER_PERMISSIONS___
