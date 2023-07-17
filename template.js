@@ -138,20 +138,22 @@ function mapEvent(eventData, data) {
   let mappedData = {
     version: '2.0',
     event_type: getEventName(eventData, data),
-    event_tag: data.eventTag,
     event_conversion_type: data.eventConversionType,
-    pixel_id: data.pixelId,
     timestamp: Math.round(getTimestampMillis() / 1000),
-    page_url: eventData.page_location || getRequestHeader('referer'),
-    user_agent: eventData.user_agent,
-    hashed_ip_address: eventData.ip_override,
-    integration: 'gtmss',
-    uuid_c1: getSCID(),
+    event_tag: data.eventTag,
+    integration: 'stape',
   };
 
-  if (data.eventId) mappedData.client_dedup_id = data.eventId;
-  else if (eventData.client_dedup_id)
-    mappedData.client_dedup_id = eventData.client_dedup_id;
+  if (data.eventConversionType === 'WEB') {
+        mappedData.page_url = eventData.page_location || getRequestHeader('referer');
+  }
+
+  if (data.eventConversionType === 'MOBILE_APP') {
+    mappedData.app_id = data.appId;
+    mappedData.snap_app_id = data.snapAppId;
+  } else {
+    mappedData.pixel_id = data.pixelId;
+  }
 
   mappedData = addUserData(eventData, mappedData);
   mappedData = addPropertiesData(eventData, mappedData);
@@ -200,6 +202,14 @@ function hashDataIfNeeded(mappedData) {
       key === 'hashed_email' ||
       key === 'hashed_phone_number' ||
       key === 'hashed_ip_address' ||
+      key === 'hashed_first_name_sha' ||
+      key === 'hashed_middle_name_sha' ||
+      key === 'hashed_last_name_sha' ||
+      key === 'hashed_city_sha' ||
+      key === 'hashed_state_sha' ||
+      key === 'hashed_zip' ||
+      key === 'hashed_dob_month' ||
+      key === 'hashed_dob_day' ||
       key === 'hashed_mobile_ad_id' ||
       key === 'hashed_idfv'
     ) {
@@ -211,6 +221,22 @@ function hashDataIfNeeded(mappedData) {
 }
 
 function addPropertiesData(eventData, mappedData) {
+  let scid = getSCID();
+  if (scid) mappedData.uuid_c1 = scid;
+
+  if (eventData.click_id) mappedData.click_id = eventData.click_id;
+
+  if (data.eventId) mappedData.client_dedup_id = data.eventId;
+  else if (eventData.client_dedup_id) mappedData.client_dedup_id = eventData.client_dedup_id;
+  else if (eventData.event_id) mappedData.client_dedup_id = eventData.event_id;
+
+  if (eventData.user_agent) mappedData.user_agent = eventData.user_agent;
+  if (eventData.ip_override) mappedData.hashed_ip_address = eventData.ip_override;
+
+  if (eventData.att_status) mappedData.att_status = eventData.att_status;
+  if (eventData.device_model) mappedData.device_model = eventData.device_model;
+  if (eventData.os_version) mappedData.os_version = eventData.os_version;
+
   if (eventData['x-ga-mp1-ev']) mappedData.price = eventData['x-ga-mp1-ev'];
   else if (eventData['x-ga-mp1-tr'])
     mappedData.price = eventData['x-ga-mp1-tr'];
@@ -235,6 +261,9 @@ function addPropertiesData(eventData, mappedData) {
   if (eventData.number_items) mappedData.number_items = eventData.number_items;
   if (eventData.price) mappedData.price = eventData.price;
   if (eventData.level) mappedData.level = eventData.level;
+  if (eventData.brands) mappedData.brands = eventData.brands;
+  if (eventData.delivery_method) mappedData.delivery_method = eventData.delivery_method;
+  if (eventData.customer_status) mappedData.customer_status = eventData.customer_status;
   if (eventData.data_use) mappedData.data_use = eventData.data_use;
   if (eventData.sign_up_method)
     mappedData.sign_up_method = eventData.sign_up_method;
@@ -271,6 +300,36 @@ function addUserData(eventData, mappedData) {
   if (eventData.phone) mappedData.hashed_phone_number = eventData.phone;
   else if (eventData.user_data && eventData.user_data.phone_number)
     mappedData.hashed_phone_number = eventData.user_data.phone_number;
+
+  if (eventData.hashed_mobile_ad_id) mappedData.hashed_mobile_ad_id = eventData.hashed_mobile_ad_id;
+  else if (eventData.mobile_ad_id) mappedData.hashed_mobile_ad_id = eventData.mobile_ad_id;
+
+  if (eventData.hashed_idfv) mappedData.hashed_idfv = eventData.hashed_idfv;
+  else if (eventData.idfv) mappedData.hashed_idfv = eventData.idfv;
+
+  if (eventData.hashed_first_name_sha) mappedData.hashed_first_name_sha = eventData.hashed_first_name_sha;
+  else if (eventData.first_name_sha) mappedData.hashed_first_name_sha = eventData.first_name_sha;
+
+  if (eventData.hashed_middle_name_sha) mappedData.hashed_middle_name_sha = eventData.hashed_middle_name_sha;
+  else if (eventData.middle_name_sha) mappedData.hashed_middle_name_sha = eventData.middle_name_sha;
+
+  if (eventData.hashed_last_name_sha) mappedData.hashed_last_name_sha = eventData.hashed_last_name_sha;
+  else if (eventData.last_name_sha) mappedData.hashed_last_name_sha = eventData.last_name_sha;
+
+  if (eventData.hashed_city_sha) mappedData.hashed_city_sha = eventData.hashed_city_sha;
+  else if (eventData.city_sha) mappedData.hashed_city_sha = eventData.city_sha;
+
+  if (eventData.hashed_state_sha) mappedData.hashed_state_sha = eventData.hashed_state_sha;
+  else if (eventData.state_sha) mappedData.hashed_state_sha = eventData.state_sha;
+
+  if (eventData.hashed_zip) mappedData.hashed_zip = eventData.hashed_zip;
+  else if (eventData.zip) mappedData.hashed_zip = eventData.zip;
+
+  if (eventData.hashed_dob_month) mappedData.hashed_dob_month = eventData.hashed_dob_month;
+  else if (eventData.dob_month) mappedData.hashed_dob_month = eventData.dob_month;
+
+  if (eventData.hashed_dob_day) mappedData.hashed_dob_day = eventData.hashed_dob_day;
+  else if (eventData.dob_day) mappedData.hashed_dob_day = eventData.dob_day;
 
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
@@ -325,5 +384,13 @@ function getSCID() {
     return eventData._scid;
   }
 
-  return createUUID();
+  if (eventData.scid) {
+    return eventData.scid;
+  }
+
+  if (data.eventConversionType === 'WEB') {
+    return createUUID();
+  }
+
+  return undefined;
 }
