@@ -37,9 +37,21 @@ function sendTrackRequest(postBody) {
         EventName: postBody.event_type,
         RequestMethod: 'POST',
         RequestUrl: postUrl,
-        RequestBody: postBody,
+        RequestBody: postBody
       })
     );
+  }
+  const cookieOptions = {
+    domain: 'auto',
+    path: '/',
+    samesite: 'Lax',
+    secure: true,
+    'max-age': 31536000, // 1 year
+    httpOnly: !!data.useHttpOnlyCookie
+  };
+
+  if (postBody.uuid_c1) {
+    setCookie('_scid', postBody.uuid_c1, cookieOptions);
   }
 
   sendHttpRequest(
@@ -54,37 +66,31 @@ function sendTrackRequest(postBody) {
             EventName: postBody.event_type,
             ResponseStatusCode: statusCode,
             ResponseHeaders: headers,
-            ResponseBody: body,
+            ResponseBody: body
           })
         );
       }
-
-      if (statusCode >= 200 && statusCode < 400) {
-        if (postBody.uuid_c1) {
-          setCookie('_scid', postBody.uuid_c1, {
-            domain: 'auto',
-            path: '/',
-            samesite: 'Lax',
-            secure: true,
-            'max-age': 31536000, // 1 year
-            httpOnly: !!data.useHttpOnlyCookie,
-          });
+      if (!data.useOptimisticScenario) {
+        if (statusCode >= 200 && statusCode < 400) {
+          data.gtmOnSuccess();
+        } else {
+          data.gtmOnFailure();
         }
-
-        data.gtmOnSuccess();
-      } else {
-        data.gtmOnFailure();
       }
     },
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + data.apiToken,
+        Authorization: 'Bearer ' + data.apiToken
       },
-      method: 'POST',
+      method: 'POST'
     },
     JSON.stringify(postBody)
   );
+}
+
+if (data.useOptimisticScenario) {
+  data.gtmOnSuccess();
 }
 
 function getEventName(eventData, data) {
@@ -119,7 +125,7 @@ function getEventName(eventData, data) {
       'gtm4wp.productClickEEC': 'VIEW_CONTENT',
       'gtm4wp.checkoutOptionEEC': 'START_CHECKOUT',
       'gtm4wp.checkoutStepEEC': 'ADD_BILLING',
-      'gtm4wp.orderCompletedEEC': 'PURCHASE',
+      'gtm4wp.orderCompletedEEC': 'PURCHASE'
     };
 
     if (!gaToEventName[eventName]) {
@@ -141,11 +147,11 @@ function mapEvent(eventData, data) {
     event_conversion_type: data.eventConversionType,
     timestamp: Math.round(getTimestampMillis() / 1000),
     event_tag: data.eventTag,
-    integration: 'stape',
+    integration: 'stape'
   };
 
   if (data.eventConversionType === 'WEB') {
-        mappedData.page_url = eventData.page_location || getRequestHeader('referer');
+    mappedData.page_url = eventData.page_location || getRequestHeader('referer');
   }
 
   if (data.eventConversionType === 'MOBILE_APP') {
@@ -192,7 +198,7 @@ function hashData(value) {
   }
 
   return sha256Sync(makeString(value).trim().toLowerCase(), {
-    outputEncoding: 'hex',
+    outputEncoding: 'hex'
   });
 }
 
