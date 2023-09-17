@@ -19,6 +19,11 @@ const isLoggingEnabled = determinateIsLoggingEnabled();
 const traceId = getRequestHeader('trace-id');
 
 const eventData = getAllEventData();
+const url = eventData.page_location || getRequestHeader('referer');
+
+if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
+  return data.gtmOnSuccess();
+}
 
 sendTrackRequest(mapEvent(eventData, data));
 
