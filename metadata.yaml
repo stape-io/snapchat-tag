@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 151fab45cae6cf12f0e9a38494a14af22b7eab29
+    changeNotes: Add GTM MSR check.
   - sha: 2ee86dc3e114e847b9d003a6d8442708135a3c1a
     changeNotes: Add ability to use OptimisticScenario
   - sha: 98f4a0b185f3324fb6d8db59efa9851bde3e9283
