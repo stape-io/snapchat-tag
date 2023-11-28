@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 0c049d2c3f851edba50799e02add978db7415cb7
+    changeNotes: Added click_id param.
   - sha: 151fab45cae6cf12f0e9a38494a14af22b7eab29
     changeNotes: Add GTM MSR check.
   - sha: 2ee86dc3e114e847b9d003a6d8442708135a3c1a

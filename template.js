@@ -12,6 +12,7 @@ const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const Math = require('Math');
 const generateRandom = require('generateRandom');
+const decodeUriComponent = require('decodeUriComponent');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -42,18 +43,23 @@ function sendTrackRequest(postBody) {
         EventName: postBody.event_type,
         RequestMethod: 'POST',
         RequestUrl: postUrl,
-        RequestBody: postBody
+        RequestBody: postBody,
       })
     );
   }
+
   const cookieOptions = {
     domain: 'auto',
     path: '/',
     samesite: 'Lax',
     secure: true,
     'max-age': 31536000, // 1 year
-    httpOnly: !!data.useHttpOnlyCookie
+    httpOnly: !!data.useHttpOnlyCookie,
   };
+
+  if (postBody.click_id) {
+    setCookie('_scclid', postBody.click_id, cookieOptions);
+  }
 
   if (postBody.uuid_c1) {
     setCookie('_scid', postBody.uuid_c1, cookieOptions);
@@ -71,7 +77,7 @@ function sendTrackRequest(postBody) {
             EventName: postBody.event_type,
             ResponseStatusCode: statusCode,
             ResponseHeaders: headers,
-            ResponseBody: body
+            ResponseBody: body,
           })
         );
       }
@@ -86,9 +92,9 @@ function sendTrackRequest(postBody) {
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + data.apiToken
+        Authorization: 'Bearer ' + data.apiToken,
       },
-      method: 'POST'
+      method: 'POST',
     },
     JSON.stringify(postBody)
   );
@@ -130,7 +136,7 @@ function getEventName(eventData, data) {
       'gtm4wp.productClickEEC': 'VIEW_CONTENT',
       'gtm4wp.checkoutOptionEEC': 'START_CHECKOUT',
       'gtm4wp.checkoutStepEEC': 'ADD_BILLING',
-      'gtm4wp.orderCompletedEEC': 'PURCHASE'
+      'gtm4wp.orderCompletedEEC': 'PURCHASE',
     };
 
     if (!gaToEventName[eventName]) {
@@ -140,9 +146,7 @@ function getEventName(eventData, data) {
     return gaToEventName[eventName];
   }
 
-  return data.eventType === 'standard'
-    ? data.eventNameStandard
-    : data.eventNameCustom;
+  return data.eventType === 'standard' ? data.eventNameStandard : data.eventNameCustom;
 }
 
 function mapEvent(eventData, data) {
@@ -152,8 +156,11 @@ function mapEvent(eventData, data) {
     event_conversion_type: data.eventConversionType,
     timestamp: Math.round(getTimestampMillis() / 1000),
     event_tag: data.eventTag,
-    integration: 'stape'
+    integration: 'stape',
   };
+
+  const click_id = getClickId();
+  if (click_id) mappedData.click_id = click_id;
 
   if (data.eventConversionType === 'WEB') {
     mappedData.page_url = eventData.page_location || getRequestHeader('referer');
@@ -203,7 +210,7 @@ function hashData(value) {
   }
 
   return sha256Sync(makeString(value).trim().toLowerCase(), {
-    outputEncoding: 'hex'
+    outputEncoding: 'hex',
   });
 }
 
@@ -249,21 +256,17 @@ function addPropertiesData(eventData, mappedData) {
   if (eventData.os_version) mappedData.os_version = eventData.os_version;
 
   if (eventData['x-ga-mp1-ev']) mappedData.price = eventData['x-ga-mp1-ev'];
-  else if (eventData['x-ga-mp1-tr'])
-    mappedData.price = eventData['x-ga-mp1-tr'];
+  else if (eventData['x-ga-mp1-tr']) mappedData.price = eventData['x-ga-mp1-tr'];
   else if (eventData.value) mappedData.price = eventData.value;
 
-  if (eventData.item_category)
-    mappedData.item_category = eventData.item_category;
+  if (eventData.item_category) mappedData.item_category = eventData.item_category;
   else if (eventData.category) mappedData.item_category = eventData.category;
 
   if (eventData.search_term) mappedData.search_string = eventData.search_term;
   else if (eventData.query) mappedData.search_string = eventData.query;
-  else if (eventData.search_string)
-    mappedData.search_string = eventData.search_string;
+  else if (eventData.search_string) mappedData.search_string = eventData.search_string;
 
-  if (eventData.transaction_id)
-    mappedData.transaction_id = eventData.transaction_id;
+  if (eventData.transaction_id) mappedData.transaction_id = eventData.transaction_id;
   if (eventData.currency) mappedData.currency = eventData.currency;
   if (eventData.description) mappedData.description = eventData.description;
 
@@ -276,8 +279,7 @@ function addPropertiesData(eventData, mappedData) {
   if (eventData.delivery_method) mappedData.delivery_method = eventData.delivery_method;
   if (eventData.customer_status) mappedData.customer_status = eventData.customer_status;
   if (eventData.data_use) mappedData.data_use = eventData.data_use;
-  if (eventData.sign_up_method)
-    mappedData.sign_up_method = eventData.sign_up_method;
+  if (eventData.sign_up_method) mappedData.sign_up_method = eventData.sign_up_method;
 
   if (eventData.items && eventData.items[0]) {
     let items = [];
@@ -404,4 +406,25 @@ function getSCID() {
   }
 
   return undefined;
+}
+
+function getParamsFromUrl() {
+  const params = {};
+  if (!url) return params;
+  const urlParts = url.split('?');
+  if (urlParts.length < 2) {
+    return params;
+  }
+  const query = urlParts[1];
+  const vars = query.split('&');
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split('=');
+    params[decodeUriComponent(pair[0])] = decodeUriComponent(pair[1]);
+  }
+  return params;
+}
+
+function getClickId() {
+  const params = getParamsFromUrl();
+  return params['ScCid'] || getCookieValues('_scclid')[0];
 }
