@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: a70a5ab2d5bc11707a72f9097b59fe02f9101487
+    changeNotes: Removed custom parse url funciton.
   - sha: 0c049d2c3f851edba50799e02add978db7415cb7
     changeNotes: Added click_id param.
   - sha: 151fab45cae6cf12f0e9a38494a14af22b7eab29

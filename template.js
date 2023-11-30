@@ -13,6 +13,7 @@ const getType = require('getType');
 const Math = require('Math');
 const generateRandom = require('generateRandom');
 const decodeUriComponent = require('decodeUriComponent');
+const parseUrl = require('parseUrl');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -408,23 +409,10 @@ function getSCID() {
   return undefined;
 }
 
-function getParamsFromUrl() {
-  const params = {};
-  if (!url) return params;
-  const urlParts = url.split('?');
-  if (urlParts.length < 2) {
-    return params;
-  }
-  const query = urlParts[1];
-  const vars = query.split('&');
-  for (let i = 0; i < vars.length; i++) {
-    const pair = vars[i].split('=');
-    params[decodeUriComponent(pair[0])] = decodeUriComponent(pair[1]);
-  }
-  return params;
-}
-
 function getClickId() {
-  const params = getParamsFromUrl();
-  return params['ScCid'] || getCookieValues('_scclid')[0];
+  const parsedUrl = parseUrl(url);
+  if (parsedUrl && parsedUrl.searchParams.ScCid) {
+    return parsedUrl.searchParams.ScCid;
+  }
+  return getCookieValues('_scclid')[0];
 }
