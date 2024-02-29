@@ -485,6 +485,31 @@ ___TEMPLATE_PARAMETERS___
     ]
   },
   {
+    "type": "GROUP",
+    "name": "consentSettingsGroup",
+    "displayName": "Consent Settings",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+      {
+        "type": "RADIO",
+        "name": "adStorageConsent",
+        "displayName": "",
+        "radioItems": [
+          {
+            "value": "optional",
+            "displayValue": "Send data always"
+          },
+          {
+            "value": "required",
+            "displayValue": "Send data in case marketing consent given"
+          }
+        ],
+        "simpleValueType": true,
+        "defaultValue": "optional"
+      }
+    ]
+  },
+  {
     "displayName": "Logs Settings",
     "name": "logsGroup",
     "groupStyle": "ZIPPY_CLOSED",
@@ -531,7 +556,6 @@ const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const Math = require('Math');
 const generateRandom = require('generateRandom');
-const decodeUriComponent = require('decodeUriComponent');
 const parseUrl = require('parseUrl');
 
 const containerVersion = getContainerVersion();
@@ -541,6 +565,10 @@ const traceId = getRequestHeader('trace-id');
 
 const eventData = getAllEventData();
 const url = eventData.page_location || getRequestHeader('referer');
+
+if (!isConsentGivenOrNotRequired()) {
+  return data.gtmOnSuccess();
+}
 
 if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
   return data.gtmOnSuccess();
@@ -934,6 +962,13 @@ function getClickId() {
     return parsedUrl.searchParams.ScCid;
   }
   return getCookieValues('_scclid')[0];
+}
+
+function isConsentGivenOrNotRequired() {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
 }
 
 
