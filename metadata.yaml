@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 13bb6329d9e594b1dd9b86cb1a2793474d9575c3
+    changeNotes: Consent settings section.
   - sha: a70a5ab2d5bc11707a72f9097b59fe02f9101487
     changeNotes: Removed custom parse url funciton.
   - sha: 0c049d2c3f851edba50799e02add978db7415cb7

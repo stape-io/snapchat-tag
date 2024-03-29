@@ -12,7 +12,6 @@ const getRequestHeader = require('getRequestHeader');
 const getType = require('getType');
 const Math = require('Math');
 const generateRandom = require('generateRandom');
-const decodeUriComponent = require('decodeUriComponent');
 const parseUrl = require('parseUrl');
 
 const containerVersion = getContainerVersion();
@@ -22,6 +21,10 @@ const traceId = getRequestHeader('trace-id');
 
 const eventData = getAllEventData();
 const url = eventData.page_location || getRequestHeader('referer');
+
+if (!isConsentGivenOrNotRequired()) {
+  return data.gtmOnSuccess();
+}
 
 if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
   return data.gtmOnSuccess();
@@ -415,4 +418,11 @@ function getClickId() {
     return parsedUrl.searchParams.ScCid;
   }
   return getCookieValues('_scclid')[0];
+}
+
+function isConsentGivenOrNotRequired() {
+  if (data.adStorageConsent !== 'required') return true;
+  if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
+  const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
+  return xGaGcs[2] === '1';
 }
