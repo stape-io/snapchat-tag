@@ -13,6 +13,8 @@ const getType = require('getType');
 const Math = require('Math');
 const generateRandom = require('generateRandom');
 const parseUrl = require('parseUrl');
+const makeNumber = require('makeNumber');
+const encodeUriComponent = require('encodeUriComponent');
 
 const containerVersion = getContainerVersion();
 const isDebug = containerVersion.debugMode;
@@ -32,11 +34,11 @@ if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
 
 sendTrackRequest(mapEvent(eventData, data));
 
-function sendTrackRequest(postBody) {
-  let postUrl = 'https://tr.snapchat.com/v2/conversion';
-  if (data.validate) {
-    postUrl = postUrl + '/validate';
-  }
+function sendTrackRequest(mappedEvent) {
+  const postBody = {
+    data: [mappedEvent],
+  };
+  const postUrl = getPostUrl();
 
   if (isLoggingEnabled) {
     logToConsole(
@@ -44,7 +46,7 @@ function sendTrackRequest(postBody) {
         Name: 'Snapchat',
         Type: 'Request',
         TraceId: traceId,
-        EventName: postBody.event_type,
+        EventName: mappedEvent.event_name,
         RequestMethod: 'POST',
         RequestUrl: postUrl,
         RequestBody: postBody,
@@ -61,12 +63,12 @@ function sendTrackRequest(postBody) {
     httpOnly: !!data.useHttpOnlyCookie,
   };
 
-  if (postBody.click_id) {
-    setCookie('_scclid', postBody.click_id, cookieOptions);
+  if (mappedEvent.user_data.sc_click_id) {
+    setCookie('_scclid', mappedEvent.user_data.sc_click_id, cookieOptions);
   }
 
-  if (postBody.uuid_c1) {
-    setCookie('_scid', postBody.uuid_c1, cookieOptions);
+  if (mappedEvent.user_data.sc_cookie1) {
+    setCookie('_scid', mappedEvent.user_data.sc_cookie1, cookieOptions);
   }
 
   sendHttpRequest(
@@ -78,7 +80,7 @@ function sendTrackRequest(postBody) {
             Name: 'Snapchat',
             Type: 'Response',
             TraceId: traceId,
-            EventName: postBody.event_type,
+            EventName: mappedEvent.event_name,
             ResponseStatusCode: statusCode,
             ResponseHeaders: headers,
             ResponseBody: body,
@@ -96,7 +98,6 @@ function sendTrackRequest(postBody) {
     {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: 'Bearer ' + data.apiToken,
       },
       method: 'POST',
     },
@@ -106,6 +107,16 @@ function sendTrackRequest(postBody) {
 
 if (data.useOptimisticScenario) {
   data.gtmOnSuccess();
+}
+
+function getPostUrl() {
+  const id = data.eventConversionType === 'MOBILE_APP' ? data.snapAppId : data.pixelId;
+  let postUrl = 'https://tr.snapchat.com/v3/' + encodeUriComponent(id) + 'events';
+  if (data.validate) {
+    postUrl = postUrl + '/validate';
+  }
+  postUrl = postUrl + '?access_token=' + data.accessToken;
+  return postUrl;
 }
 
 function getEventName(eventData, data) {
@@ -155,31 +166,128 @@ function getEventName(eventData, data) {
 
 function mapEvent(eventData, data) {
   let mappedData = {
-    version: '2.0',
-    event_type: getEventName(eventData, data),
-    event_conversion_type: data.eventConversionType,
-    timestamp: Math.round(getTimestampMillis() / 1000),
-    event_tag: data.eventTag,
-    integration: 'stape',
+    version: '3.0',
+    user_data: {},
   };
 
-  const click_id = getClickId();
-  if (click_id) mappedData.click_id = click_id;
+  mappedData = addServerData(eventData, mappedData);
+  mappedData = addUserData(eventData, mappedData);
+  mappedData = addCustomData(eventData, mappedData);
+  mappedData = addAppData(eventData, mappedData);
+  mappedData = hashDataIfNeeded(mappedData);
+
+  return mappedData;
+}
+
+function addCustomData(eventData, mappedData) {
+  let currencyFromItems = '';
+  let valueFromItems = 0;
+
+  if (eventData.items && eventData.items[0]) {
+    mappedData.custom_data.contents = [];
+    mappedData.custom_data.content_type = 'product';
+    currencyFromItems = eventData.items[0].currency;
+    mappedData.custom_data.num_items = eventData.items.length;
+
+    if (!eventData.items[1]) {
+      if (eventData.items[0].item_name) mappedData.custom_data.content_name = eventData.items[0].item_name;
+      if (eventData.items[0].item_category) mappedData.custom_data.content_category = eventData.items[0].item_category;
+      if (eventData.items[0].item_id) mappedData.custom_data.content_ids = eventData.items[0].item_id;
+
+      if (eventData.items[0].price) {
+        mappedData.custom_data.value = eventData.items[0].quantity
+          ? eventData.items[0].quantity * eventData.items[0].price
+          : eventData.items[0].price;
+      }
+    }
+
+    const itemIdKey = data.itemIdKey ? data.itemIdKey : 'item_id';
+    eventData.items.forEach((d, i) => {
+      let content = {};
+      if (d[itemIdKey]) content.id = d[itemIdKey];
+      if (d.quantity) content.quantity = d.quantity;
+      if (d.delivery_category) content.delivery_category = d.delivery_category;
+
+      if (d.price) {
+        content.item_price = makeNumber(d.price);
+        valueFromItems += d.quantity ? d.quantity * content.item_price : content.item_price;
+      }
+
+      mappedData.custom_data.contents.push(content);
+    });
+  }
+
+  if (eventData['x-ga-mp1-ev']) mappedData.custom_data.value = eventData['x-ga-mp1-ev'];
+  else if (eventData['x-ga-mp1-tr']) mappedData.custom_data.value = eventData['x-ga-mp1-tr'];
+  else if (eventData.value) mappedData.custom_data.value = eventData.value;
+
+  if (eventData.currency) mappedData.custom_data.currency = eventData.currency;
+  else if (currencyFromItems) mappedData.custom_data.currency = currencyFromItems;
+
+  if (eventData.search_term) mappedData.custom_data.search_string = eventData.search_term;
+
+  if (eventData.transaction_id) mappedData.custom_data.order_id = eventData.transaction_id;
+
+  if (mappedData.event_name === 'Purchase') {
+    if (!mappedData.custom_data.currency) mappedData.custom_data.currency = 'USD';
+    if (!mappedData.custom_data.value) mappedData.custom_data.value = valueFromItems ? valueFromItems : 0;
+  }
+  if (eventData.predicted_ltv) mappedData.custom_data.predicted_ltv = eventData.predicted_ltv;
+  if (eventData.sign_up_method) mappedData.custom_data.sign_up_method = eventData.sign_up_method;
+  if (eventData.brands) mappedData.custom_data.brands = eventData.brands;
+
+  if (data.customDataList) {
+    data.customDataList.forEach((d) => {
+      mappedData.custom_data[d.name] = d.value;
+    });
+  }
+
+  return mappedData;
+}
+
+function addAppData(eventData, mappedData) {
+  if (data.eventConversionType !== 'MOBILE_APP') return mappedData;
+  const appData = eventData.app_data || {};
+  mappedData.app_data = {};
+
+  const appId = data.appId || appData.app_id;
+  if (appId) mappedData.app_data.app_id = appId;
+
+  const extinfo = data.extinfo || appData.extinfo;
+  if (extinfo) mappedData.app_data.extinfo = extinfo;
+
+  const advertiser_tracking_enabled = data.advertiserTrackingEnabled || appData.advertiser_tracking_enabled;
+  if (advertiser_tracking_enabled) mappedData.app_data.advertiser_tracking_enabled = advertiser_tracking_enabled;
+
+  if (data.appDataList) {
+    data.appDataList.forEach((d) => {
+      mappedData.app_data[d.name] = d.value;
+    });
+  }
+
+  return mappedData;
+}
+
+function addServerData(eventData, mappedData) {
+  mappedData.event_name = getEventName(eventData, data);
+  mappedData.event_time = Math.round(getTimestampMillis() / 1000);
+  mappedData.action_source = data.eventConversionType;
+  mappedData.test_event_code = data.testEventCode;
+  mappedData.integration = 'stape';
 
   if (data.eventConversionType === 'WEB') {
-    mappedData.page_url = eventData.page_location || getRequestHeader('referer');
+    mappedData.event_source_url = eventData.page_location || getRequestHeader('referer');
   }
 
-  if (data.eventConversionType === 'MOBILE_APP') {
-    mappedData.app_id = data.appId;
-    mappedData.snap_app_id = data.snapAppId;
-  } else {
-    mappedData.pixel_id = data.pixelId;
-  }
+  const eventId = eventData.event_id || eventData.transaction_id;
+  if (eventId) mappedData.event_id = eventId;
+  if (eventData.test_event_code) mappedData.test_event_code = eventData.test_event_code;
 
-  mappedData = addUserData(eventData, mappedData);
-  mappedData = addPropertiesData(eventData, mappedData);
-  mappedData = hashDataIfNeeded(mappedData);
+  if (data.serverDataList) {
+    data.serverDataList.forEach((d) => {
+      mappedData[d.name] = d.value;
+    });
+  }
 
   return mappedData;
 }
@@ -219,134 +327,90 @@ function hashData(value) {
 }
 
 function hashDataIfNeeded(mappedData) {
-  for (let key in mappedData) {
-    if (
-      key === 'hashed_email' ||
-      key === 'hashed_phone_number' ||
-      key === 'hashed_ip_address' ||
-      key === 'hashed_first_name_sha' ||
-      key === 'hashed_middle_name_sha' ||
-      key === 'hashed_last_name_sha' ||
-      key === 'hashed_city_sha' ||
-      key === 'hashed_state_sha' ||
-      key === 'hashed_zip' ||
-      key === 'hashed_dob_month' ||
-      key === 'hashed_dob_day' ||
-      key === 'hashed_mobile_ad_id' ||
-      key === 'hashed_idfv'
-    ) {
+  const fieldsToHash = ['em', 'ph', 'fn', 'ln', 'ge', 'ct', 'st', 'zp', 'country', 'external_id'];
+  for (let key in mappedData.user_data) {
+    if (fieldsToHash.indexOf(key) !== -1) {
       mappedData[key] = hashData(mappedData[key]);
     }
   }
-
-  return mappedData;
-}
-
-function addPropertiesData(eventData, mappedData) {
-  let scid = getSCID();
-  if (scid) mappedData.uuid_c1 = scid;
-
-  if (eventData.click_id) mappedData.click_id = eventData.click_id;
-
-  if (data.eventId) mappedData.client_dedup_id = data.eventId;
-  else if (eventData.client_dedup_id) mappedData.client_dedup_id = eventData.client_dedup_id;
-  else if (eventData.event_id) mappedData.client_dedup_id = eventData.event_id;
-
-  if (eventData.user_agent) mappedData.user_agent = eventData.user_agent;
-  if (eventData.ip_override) mappedData.hashed_ip_address = eventData.ip_override;
-
-  if (eventData.att_status) mappedData.att_status = eventData.att_status;
-  if (eventData.device_model) mappedData.device_model = eventData.device_model;
-  if (eventData.os_version) mappedData.os_version = eventData.os_version;
-
-  if (eventData['x-ga-mp1-ev']) mappedData.price = eventData['x-ga-mp1-ev'];
-  else if (eventData['x-ga-mp1-tr']) mappedData.price = eventData['x-ga-mp1-tr'];
-  else if (eventData.value) mappedData.price = eventData.value;
-
-  if (eventData.item_category) mappedData.item_category = eventData.item_category;
-  else if (eventData.category) mappedData.item_category = eventData.category;
-
-  if (eventData.search_term) mappedData.search_string = eventData.search_term;
-  else if (eventData.query) mappedData.search_string = eventData.query;
-  else if (eventData.search_string) mappedData.search_string = eventData.search_string;
-
-  if (eventData.transaction_id) mappedData.transaction_id = eventData.transaction_id;
-  if (eventData.currency) mappedData.currency = eventData.currency;
-  if (eventData.description) mappedData.description = eventData.description;
-
-  if (eventData.event_tag) mappedData.event_tag = eventData.event_tag;
-  if (eventData.item_ids) mappedData.item_ids = eventData.item_ids;
-  if (eventData.number_items) mappedData.number_items = eventData.number_items;
-  if (eventData.price) mappedData.price = eventData.price;
-  if (eventData.level) mappedData.level = eventData.level;
-  if (eventData.brands) mappedData.brands = eventData.brands;
-  if (eventData.delivery_method) mappedData.delivery_method = eventData.delivery_method;
-  if (eventData.customer_status) mappedData.customer_status = eventData.customer_status;
-  if (eventData.data_use) mappedData.data_use = eventData.data_use;
-  if (eventData.sign_up_method) mappedData.sign_up_method = eventData.sign_up_method;
-
-  if (eventData.items && eventData.items[0]) {
-    let items = [];
-
-    eventData.items.forEach((d, i) => {
-      let itemId = {};
-
-      if (d.item_id) itemId = d.item_id;
-      else if (d.id) itemId = d.id;
-
-      items.push(itemId);
-    });
-
-    mappedData.item_ids = items.join(';');
-  }
-
-  if (data.customDataList) {
-    data.customDataList.forEach((d) => {
-      mappedData[d.name] = d.value;
-    });
-  }
-
   return mappedData;
 }
 
 function addUserData(eventData, mappedData) {
-  if (eventData.email) mappedData.hashed_email = eventData.email;
-  else if (eventData.user_data && eventData.user_data.email_address)
-    mappedData.hashed_email = eventData.user_data.email_address;
+  let address = {};
+  let user_data = {};
+  if (getType(eventData.user_data) === 'object') {
+    user_data = eventData.user_data;
+    const addressType = getType(user_data.address);
+    if (addressType === 'object' || addressType === 'array') {
+      address = user_data.address[0] || user_data.address;
+    }
+  }
+  const click_id = getClickId();
+  if (click_id) mappedData.user_data.sc_click_id = click_id;
+  const scid = getSCID();
+  if (scid) mappedData.user_data.sc_cookie1 = scid;
 
-  if (eventData.phone) mappedData.hashed_phone_number = eventData.phone;
-  else if (eventData.user_data && eventData.user_data.phone_number)
-    mappedData.hashed_phone_number = eventData.user_data.phone_number;
+  if (eventData.anon_id) mappedData.user_data.anon_id = eventData.anon_id;
+  if (eventData.madid) mappedData.user_data.madid = eventData.madid;
+  if (eventData.download_id) mappedData.user_data.download_id = eventData.download_id;
+  if (eventData.user_agent) mappedData.user_data.client_user_agent = eventData.user_agent;
+  if (eventData.idfv) mappedData.user_data.idfv = eventData.idfv;
 
-  if (eventData.hashed_mobile_ad_id) mappedData.hashed_mobile_ad_id = eventData.hashed_mobile_ad_id;
-  else if (eventData.mobile_ad_id) mappedData.hashed_mobile_ad_id = eventData.mobile_ad_id;
+  if (eventData.external_id) mappedData.user_data.external_id = eventData.external_id;
+  else if (eventData.user_id) mappedData.user_data.external_id = eventData.user_id;
+  else if (eventData.userId) mappedData.user_data.external_id = eventData.userId;
 
-  if (eventData.hashed_idfv) mappedData.hashed_idfv = eventData.hashed_idfv;
-  else if (eventData.idfv) mappedData.hashed_idfv = eventData.idfv;
+  if (eventData.subscription_id) mappedData.user_data.subscription_id = eventData.subscription_id;
+  else if (eventData.subscriptionId) mappedData.user_data.subscription_id = eventData.subscriptionId;
 
-  if (eventData.hashed_first_name_sha) mappedData.hashed_first_name_sha = eventData.hashed_first_name_sha;
-  else if (eventData.first_name_sha) mappedData.hashed_first_name_sha = eventData.first_name_sha;
+  if (eventData.lead_id) mappedData.user_data.lead_id = eventData.lead_id;
+  else if (eventData.leadId) mappedData.user_data.lead_id = eventData.leadId;
 
-  if (eventData.hashed_middle_name_sha) mappedData.hashed_middle_name_sha = eventData.hashed_middle_name_sha;
-  else if (eventData.middle_name_sha) mappedData.hashed_middle_name_sha = eventData.middle_name_sha;
+  if (eventData.lastName) mappedData.user_data.ln = eventData.lastName;
+  else if (eventData.LastName) mappedData.user_data.ln = eventData.LastName;
+  else if (eventData.nameLast) mappedData.user_data.ln = eventData.nameLast;
+  else if (eventData.last_name) mappedData.user_data.ln = eventData.last_name;
+  else if (user_data.last_name) mappedData.user_data.ln = user_data.last_name;
+  else if (address.last_name) mappedData.user_data.ln = address.last_name;
 
-  if (eventData.hashed_last_name_sha) mappedData.hashed_last_name_sha = eventData.hashed_last_name_sha;
-  else if (eventData.last_name_sha) mappedData.hashed_last_name_sha = eventData.last_name_sha;
+  if (eventData.firstName) mappedData.user_data.fn = eventData.firstName;
+  else if (eventData.FirstName) mappedData.user_data.fn = eventData.FirstName;
+  else if (eventData.nameFirst) mappedData.user_data.fn = eventData.nameFirst;
+  else if (eventData.first_name) mappedData.user_data.fn = eventData.first_name;
+  else if (user_data.first_name) mappedData.user_data.fn = user_data.first_name;
+  else if (address.first_name) mappedData.user_data.fn = address.first_name;
 
-  if (eventData.hashed_city_sha) mappedData.hashed_city_sha = eventData.hashed_city_sha;
-  else if (eventData.city_sha) mappedData.hashed_city_sha = eventData.city_sha;
+  if (eventData.email) mappedData.user_data.em = eventData.email;
+  else if (user_data.email_address) mappedData.user_data.em = user_data.email_address;
+  else if (user_data.email) mappedData.user_data.em = user_data.email;
 
-  if (eventData.hashed_state_sha) mappedData.hashed_state_sha = eventData.hashed_state_sha;
-  else if (eventData.state_sha) mappedData.hashed_state_sha = eventData.state_sha;
+  if (eventData.phone) mappedData.user_data.ph = eventData.phone;
+  else if (user_data.phone_number) mappedData.user_data.ph = user_data.phone_number;
 
-  if (eventData.hashed_zip) mappedData.hashed_zip = eventData.hashed_zip;
-  else if (eventData.zip) mappedData.hashed_zip = eventData.zip;
+  if (eventData.city) mappedData.user_data.ct = eventData.city;
+  else if (address.city) mappedData.user_data.ct = address.city;
 
-  if (eventData.hashed_dob_month) mappedData.hashed_dob_month = eventData.hashed_dob_month;
-  else if (eventData.dob_month) mappedData.hashed_dob_month = eventData.dob_month;
+  if (eventData.state) mappedData.user_data.st = eventData.state;
+  else if (eventData.region) mappedData.user_data.st = eventData.region;
+  else if (user_data.region) mappedData.user_data.st = user_data.region;
+  else if (address.region) mappedData.user_data.st = address.region;
 
-  if (eventData.hashed_dob_day) mappedData.hashed_dob_day = eventData.hashed_dob_day;
-  else if (eventData.dob_day) mappedData.hashed_dob_day = eventData.dob_day;
+  if (eventData.zip) mappedData.user_data.zp = eventData.zip;
+  else if (eventData.postal_code) mappedData.user_data.zp = eventData.postal_code;
+  else if (user_data.postal_code) mappedData.user_data.zp = user_data.postal_code;
+  else if (address.postal_code) mappedData.user_data.zp = address.postal_code;
+
+  if (eventData.countryCode) mappedData.user_data.country = eventData.countryCode;
+  else if (eventData.country) mappedData.user_data.country = eventData.country;
+  else if (user_data.country) mappedData.user_data.country = user_data.country;
+  else if (address.country) mappedData.user_data.country = address.country;
+
+  if (eventData.gender) mappedData.user_data.ge = eventData.gender;
+
+  if (eventData.ip_override) {
+    mappedData.user_data.client_ip_address = eventData.ip_override.split(' ').join('').split(',')[0];
+  }
 
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
@@ -413,6 +477,7 @@ function getSCID() {
 }
 
 function getClickId() {
+  if (eventData.click_id) return eventData.click_id;
   const parsedUrl = parseUrl(url);
   if (parsedUrl && parsedUrl.searchParams.ScCid) {
     return parsedUrl.searchParams.ScCid;
