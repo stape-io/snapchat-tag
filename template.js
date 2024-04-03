@@ -36,7 +36,7 @@ sendTrackRequest(mapEvent(eventData, data));
 
 function sendTrackRequest(mappedEvent) {
   const postBody = {
-    data: [mappedEvent],
+    data: [mappedEvent]
   };
   const postUrl = getPostUrl();
 
@@ -49,7 +49,7 @@ function sendTrackRequest(mappedEvent) {
         EventName: mappedEvent.event_name,
         RequestMethod: 'POST',
         RequestUrl: postUrl,
-        RequestBody: postBody,
+        RequestBody: postBody
       })
     );
   }
@@ -60,7 +60,7 @@ function sendTrackRequest(mappedEvent) {
     samesite: 'Lax',
     secure: true,
     'max-age': 31536000, // 1 year
-    httpOnly: !!data.useHttpOnlyCookie,
+    httpOnly: !!data.useHttpOnlyCookie
   };
 
   if (mappedEvent.user_data.sc_click_id) {
@@ -83,7 +83,7 @@ function sendTrackRequest(mappedEvent) {
             EventName: mappedEvent.event_name,
             ResponseStatusCode: statusCode,
             ResponseHeaders: headers,
-            ResponseBody: body,
+            ResponseBody: body
           })
         );
       }
@@ -97,9 +97,9 @@ function sendTrackRequest(mappedEvent) {
     },
     {
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      method: 'POST',
+      method: 'POST'
     },
     JSON.stringify(postBody)
   );
@@ -151,7 +151,7 @@ function getEventName(eventData, data) {
       'gtm4wp.productClickEEC': 'VIEW_CONTENT',
       'gtm4wp.checkoutOptionEEC': 'START_CHECKOUT',
       'gtm4wp.checkoutStepEEC': 'ADD_BILLING',
-      'gtm4wp.orderCompletedEEC': 'PURCHASE',
+      'gtm4wp.orderCompletedEEC': 'PURCHASE'
     };
 
     if (!gaToEventName[eventName]) {
@@ -167,7 +167,7 @@ function getEventName(eventData, data) {
 function mapEvent(eventData, data) {
   let mappedData = {
     version: '3.0',
-    user_data: {},
+    user_data: {}
   };
 
   mappedData = addServerData(eventData, mappedData);
@@ -322,7 +322,7 @@ function hashData(value) {
   }
 
   return sha256Sync(makeString(value).trim().toLowerCase(), {
-    outputEncoding: 'hex',
+    outputEncoding: 'hex'
   });
 }
 
