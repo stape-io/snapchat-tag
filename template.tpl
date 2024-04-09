@@ -803,7 +803,8 @@ function getEventName(eventData, data) {
 function mapEvent(eventData, data) {
   let mappedData = {
     version: '3.0',
-    user_data: {}
+    user_data: {},
+    custom_data: {}
   };
 
   mappedData = addServerData(eventData, mappedData);
