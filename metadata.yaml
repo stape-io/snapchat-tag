@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: a811c915bc0c838675f6050483eaf49f8f484c0c
+    changeNotes: Fix error with custom_data.
   - sha: 1c14665d881cb8bc1c62d545cabae6b2693b2c64
     changeNotes: Added API v3 support.
   - sha: 13bb6329d9e594b1dd9b86cb1a2793474d9575c3
