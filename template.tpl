@@ -668,6 +668,11 @@ if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
   return data.gtmOnSuccess();
 }
 
+const pixelOrAppId = data.eventConversionType === 'MOBILE_APP' ? data.snapAppId : data.pixelId;
+if(!pixelOrAppId || !data.accessToken) {
+  return data.gtmOnFailure();
+}
+
 sendTrackRequest(mapEvent(eventData, data));
 
 function sendTrackRequest(mappedEvent) {
@@ -746,8 +751,7 @@ if (data.useOptimisticScenario) {
 }
 
 function getPostUrl() {
-  const id = data.eventConversionType === 'MOBILE_APP' ? data.snapAppId : data.pixelId;
-  let postUrl = 'https://tr.snapchat.com/v3/' + encodeUriComponent(id) + 'events';
+  let postUrl = 'https://tr.snapchat.com/v3/' + encodeUriComponent(pixelOrAppId) + '/events';
   if (data.validate) {
     postUrl = postUrl + '/validate';
   }
@@ -875,7 +879,9 @@ function addCustomData(eventData, mappedData) {
 
   if (data.customDataList) {
     data.customDataList.forEach((d) => {
-      mappedData.custom_data[d.name] = d.value;
+      if(isValidValue(d.value)) {
+        mappedData.custom_data[d.name] = d.value;
+      }
     });
   }
 
@@ -898,7 +904,9 @@ function addAppData(eventData, mappedData) {
 
   if (data.appDataList) {
     data.appDataList.forEach((d) => {
-      mappedData.app_data[d.name] = d.value;
+      if (isValidValue(d.value)) {
+        mappedData.app_data[d.name] = d.value;
+      }
     });
   }
 
@@ -922,7 +930,9 @@ function addServerData(eventData, mappedData) {
 
   if (data.serverDataList) {
     data.serverDataList.forEach((d) => {
-      mappedData[d.name] = d.value;
+      if (isValidValue(d.value)) {
+        mappedData[d.name] = d.value;
+      }
     });
   }
 
@@ -1051,7 +1061,9 @@ function addUserData(eventData, mappedData) {
 
   if (data.userDataList) {
     data.userDataList.forEach((d) => {
-      mappedData[d.name] = d.value;
+      if (isValidValue(d.value)) {
+        mappedData.user_data[d.name] = d.value;
+      }
     });
   }
 
@@ -1127,6 +1139,11 @@ function isConsentGivenOrNotRequired() {
   if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
   return xGaGcs[2] === '1';
+}
+
+function isValidValue(value) {
+  const valueType = getType(value);
+  return valueType !== 'null' && valueType !== 'undefined' && value !== '';
 }
 
 

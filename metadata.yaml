@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 81fefccc9ebf0f95b71475cf07e65b45b7132879
+    changeNotes: Data validation improvements.
   - sha: a811c915bc0c838675f6050483eaf49f8f484c0c
     changeNotes: Fix error with custom_data.
   - sha: 1c14665d881cb8bc1c62d545cabae6b2693b2c64
