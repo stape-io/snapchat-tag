@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 8671ef925695c8b4a9b7b992b7c7552a0d1b6b8c
+    changeNotes: Override click id & userData hashing fix.
   - sha: 81fefccc9ebf0f95b71475cf07e65b45b7132879
     changeNotes: Data validation improvements.
   - sha: a811c915bc0c838675f6050483eaf49f8f484c0c

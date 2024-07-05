@@ -33,7 +33,7 @@ if (url && url.lastIndexOf('https://gtm-msr.appspot.com/', 0) === 0) {
 }
 
 const pixelOrAppId = data.eventConversionType === 'MOBILE_APP' ? data.snapAppId : data.pixelId;
-if(!pixelOrAppId || !data.accessToken) {
+if (!pixelOrAppId || !data.accessToken) {
   return data.gtmOnFailure();
 }
 
@@ -243,7 +243,7 @@ function addCustomData(eventData, mappedData) {
 
   if (data.customDataList) {
     data.customDataList.forEach((d) => {
-      if(isValidValue(d.value)) {
+      if (isValidValue(d.value)) {
         mappedData.custom_data[d.name] = d.value;
       }
     });
@@ -341,7 +341,7 @@ function hashDataIfNeeded(mappedData) {
   const fieldsToHash = ['em', 'ph', 'fn', 'ln', 'ge', 'ct', 'st', 'zp', 'country', 'external_id'];
   for (let key in mappedData.user_data) {
     if (fieldsToHash.indexOf(key) !== -1) {
-      mappedData[key] = hashData(mappedData[key]);
+      mappedData.user_data[key] = hashData(mappedData.user_data[key]);
     }
   }
   return mappedData;

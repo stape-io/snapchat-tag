@@ -474,6 +474,10 @@ ___TEMPLATE_PARAMETERS___
               {
                 "value": "client_user_agent",
                 "displayValue": "User Agent"
+              },
+              {
+                "value": "sc_click_id",
+                "displayValue": "Click ID"
               }
             ]
           },
@@ -547,7 +551,7 @@ ___TEMPLATE_PARAMETERS___
       {
         "type": "LABEL",
         "name": "сustomDataLabel",
-        "displayName": "See \u003ca href\u003d\"https://marketingapi.snapchat.com/docs/conversion.html#conversion-parameters\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what data parameters you can add to the call."
+        "displayName": "See \u003ca href\u003d\"https://docs.snap.com/api/marketing-api/Conversions-API/Parameters\" target\u003d\"_blank\"\u003ethis documentation\u003c/a\u003e for more details on what data parameters you can add to the call."
       },
       {
         "name": "customDataList",
