@@ -316,7 +316,7 @@ ___TEMPLATE_PARAMETERS___
   {
     "type": "CHECKBOX",
     "name": "validate",
-    "checkboxText": "Validate CAPI events",
+    "checkboxText": "Test Mode",
     "simpleValueType": true,
     "help": "If enabled conversion request will be sent to /v3/{{asset_id}}/events/validate \u003ca href\u003d\"https://docs.snap.com/api/marketing-api/Conversions-API/VerifySetUp\"\u003emore info\u003c/a\u003e"
   },
