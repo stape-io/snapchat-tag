@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 7fdf7ab205d7d7af477765694b9ef83d91375d2c
+    changeNotes: Update name of validate checkbox.
   - sha: 606f02c9e2f6aeddeac547779ae7c13c39a3b24b
     changeNotes: Update tpl with user_data hasing fix.
   - sha: 8671ef925695c8b4a9b7b992b7c7552a0d1b6b8c
