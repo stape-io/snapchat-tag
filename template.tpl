@@ -677,6 +677,8 @@ if (!pixelOrAppId || !data.accessToken) {
   return data.gtmOnFailure();
 }
 
+const commonCookie = eventData.common_cookie || {};
+
 sendTrackRequest(mapEvent(eventData, data));
 
 function sendTrackRequest(mappedEvent) {
@@ -1108,7 +1110,7 @@ function createUUID() {
 }
 
 function getSCID() {
-  const scidCookie = getCookieValues('_scid')[0];
+  const scidCookie = getCookieValues('_scid')[0] || commonCookie._scid;
 
   if (scidCookie) {
     return scidCookie;
@@ -1135,7 +1137,7 @@ function getClickId() {
   if (parsedUrl && parsedUrl.searchParams.ScCid) {
     return parsedUrl.searchParams.ScCid;
   }
-  return getCookieValues('_scclid')[0];
+  return getCookieValues('_scclid')[0] || commonCookie._scclid;
 }
 
 function isConsentGivenOrNotRequired() {
