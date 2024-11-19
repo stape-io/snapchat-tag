@@ -717,7 +717,7 @@ function sendTrackRequest(mappedEvent) {
     httpOnly: !!data.useHttpOnlyCookie
   };
 
-  if (mappedEvent.user_data.sc_click_id) {
+  if (mappedEvent.user_data.sc_click_id && data.setClickID) {
     setCookie('_scclid', mappedEvent.user_data.sc_click_id, cookieOptions);
   }
 
