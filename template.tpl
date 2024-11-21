@@ -318,7 +318,8 @@ ___TEMPLATE_PARAMETERS___
     "name": "setClickID",
     "checkboxText": "Set Click ID cookie",
     "simpleValueType": true,
-    "help": "Set Click ID cookie if it was added to user data."
+    "help": "Set Click ID cookie if it was added to user data.",
+    "defaultValue": true
   },
   {
     "type": "CHECKBOX",
