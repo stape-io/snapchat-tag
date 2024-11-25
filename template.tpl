@@ -315,11 +315,11 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "CHECKBOX",
-    "name": "setClickID",
-    "checkboxText": "Set Click ID cookie",
+    "name": "notSetClickID",
+    "checkboxText": "Not set Click ID cookie",
     "simpleValueType": true,
-    "help": "Set Click ID cookie if it was added to user data.",
-    "defaultValue": true
+    "help": "Do not set Click ID cookie if it was added to user data.",
+    "defaultValue": false
   },
   {
     "type": "CHECKBOX",
@@ -718,7 +718,7 @@ function sendTrackRequest(mappedEvent) {
     httpOnly: !!data.useHttpOnlyCookie
   };
 
-  if (mappedEvent.user_data.sc_click_id && data.setClickID) {
+  if (mappedEvent.user_data.sc_click_id && !data.notSetClickID) {
     setCookie('_scclid', mappedEvent.user_data.sc_click_id, cookieOptions);
   }
 
