@@ -70,11 +70,11 @@ function sendTrackRequest(mappedEvent) {
     httpOnly: !!data.useHttpOnlyCookie
   };
 
-  if (mappedEvent.user_data.sc_click_id && !data.notSetClickID) {
+  if (mappedEvent.user_data.sc_click_id && !data.notSetClickIdCookie) {
     setCookie('_scclid', mappedEvent.user_data.sc_click_id, cookieOptions);
   }
 
-  if (mappedEvent.user_data.sc_cookie1) {
+  if (mappedEvent.user_data.sc_cookie1 && !data.notSetBrowserIdCookie) {
     setCookie('_scid', mappedEvent.user_data.sc_cookie1, cookieOptions);
   }
 

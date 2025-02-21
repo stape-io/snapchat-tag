@@ -315,10 +315,18 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "CHECKBOX",
-    "name": "notSetClickID",
-    "checkboxText": "Not set Click ID cookie",
+    "name": "notSetClickIdCookie",
+    "checkboxText": "Do not set Click ID (_scclid) cookie",
     "simpleValueType": true,
-    "help": "Do not set Click ID cookie if it was added to user data.",
+    "help": "Do not set Click ID (_scclid) cookie if it was added to user data.",
+    "defaultValue": false
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "notSetBrowserIdCookie",
+    "checkboxText": "Do not set Browser ID (_scid) cookie",
+    "simpleValueType": true,
+    "help": "Do not set Browser ID (_scid) cookie if it was added to user data.",
     "defaultValue": false
   },
   {
@@ -718,11 +726,11 @@ function sendTrackRequest(mappedEvent) {
     httpOnly: !!data.useHttpOnlyCookie
   };
 
-  if (mappedEvent.user_data.sc_click_id && !data.notSetClickID) {
+  if (mappedEvent.user_data.sc_click_id && !data.notSetClickIdCookie) {
     setCookie('_scclid', mappedEvent.user_data.sc_click_id, cookieOptions);
   }
 
-  if (mappedEvent.user_data.sc_cookie1) {
+  if (mappedEvent.user_data.sc_cookie1 && !data.notSetBrowserIdCookie) {
     setCookie('_scid', mappedEvent.user_data.sc_cookie1, cookieOptions);
   }
 
@@ -1487,8 +1495,52 @@ ___SERVER_PERMISSIONS___
 
 ___TESTS___
 
-scenarios: []
-setup: ''
+scenarios:
+- name: Browser ID cookie must NOT be set if checkbox is enabled
+  code: |-
+    const setCookie = require('setCookie');
+
+    mockData.notSetBrowserIdCookie = true;
+
+    const scidValue = 'scid';
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB',
+      _scid: scidValue,
+      //click_id: 'clickid'
+    });
+
+
+    mock('setCookie', (name, value, options, encode) => {
+      if (name === '_scid' && value === scidValue) fail('_scid cookie must not be set when the checkbox is enabled.');
+    });
+
+    runCode(mockData);
+- name: Browser ID cookie must be set if checkbox is disabled
+  code: |-
+    const setCookie = require('setCookie');
+
+    const scidValue = 'scid';
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB',
+      _scid: scidValue,
+    });
+
+
+    mock('setCookie', (name, value, options, encode) => {
+      assertThat(name).isEqualTo('_scid');
+      assertThat(value).isEqualTo(scidValue);
+    });
+
+    runCode(mockData);
+setup: |-
+  const logToConsole = require('logToConsole');
+
+  const mockData = {
+    pixelId: '123123123',
+    accessToken: 'accessToken123'
+  };
 
 
 ___NOTES___
