@@ -315,10 +315,18 @@ ___TEMPLATE_PARAMETERS___
   },
   {
     "type": "CHECKBOX",
-    "name": "notSetClickID",
-    "checkboxText": "Not set Click ID cookie",
+    "name": "notSetClickIdCookie",
+    "checkboxText": "Do not set Click ID (_scclid) cookie",
     "simpleValueType": true,
-    "help": "Do not set Click ID cookie if it was added to user data.",
+    "help": "Do not set Click ID (_scclid) cookie if it was added to user data.",
+    "defaultValue": false
+  },
+  {
+    "type": "CHECKBOX",
+    "name": "notSetBrowserIdCookie",
+    "checkboxText": "Do not set Browser ID (_scid) cookie",
+    "simpleValueType": true,
+    "help": "Do not set Browser ID (_scid) cookie if it was added to user data.\n\u003cbr\u003e\nDo not auto-generate it.\n\u003cbr\u003e\nIf an existing Browser ID is found, it will still be sent in the request but not stored as a cookie. It can be sourced from:\u003cul\u003e\n\u003cli\u003ean already existing \u003ci\u003e_scid\u003c/i\u003e cookie\u003c/li\u003e\n\u003cli\u003eEvent Data parameters: \u003ci\u003ecommonCookie._scid\u003c/i\u003e, \u003ci\u003escid\u003c/i\u003e or \u003ci\u003e_scid\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e",
     "defaultValue": false
   },
   {
@@ -486,6 +494,10 @@ ___TEMPLATE_PARAMETERS___
               {
                 "value": "sc_click_id",
                 "displayValue": "Click ID"
+              },
+              {
+                "value": "sc_cookie1",
+                "displayValue": "Browser ID"
               }
             ]
           },
@@ -718,11 +730,11 @@ function sendTrackRequest(mappedEvent) {
     httpOnly: !!data.useHttpOnlyCookie
   };
 
-  if (mappedEvent.user_data.sc_click_id && !data.notSetClickID) {
+  if (mappedEvent.user_data.sc_click_id && !data.notSetClickIdCookie) {
     setCookie('_scclid', mappedEvent.user_data.sc_click_id, cookieOptions);
   }
 
-  if (mappedEvent.user_data.sc_cookie1) {
+  if (mappedEvent.user_data.sc_cookie1 && !data.notSetBrowserIdCookie) {
     setCookie('_scid', mappedEvent.user_data.sc_cookie1, cookieOptions);
   }
 
@@ -1084,22 +1096,6 @@ function addUserData(eventData, mappedData) {
   return mappedData;
 }
 
-function determinateIsLoggingEnabled() {
-  if (!data.logType) {
-    return isDebug;
-  }
-
-  if (data.logType === 'no') {
-    return false;
-  }
-
-  if (data.logType === 'debug') {
-    return isDebug;
-  }
-
-  return data.logType === 'always';
-}
-
 function createUUID() {
   let len = 36;
   let chars = '0123456789abcdef'.split('');
@@ -1118,21 +1114,12 @@ function createUUID() {
 }
 
 function getSCID() {
-  const scidCookie = getCookieValues('_scid')[0] || commonCookie._scid;
-
-  if (scidCookie) {
-    return scidCookie;
+  const scid = getCookieValues('_scid')[0] || commonCookie._scid || eventData._scid || eventData.scid;
+  if (scid) {
+    return scid;
   }
 
-  if (eventData._scid) {
-    return eventData._scid;
-  }
-
-  if (eventData.scid) {
-    return eventData.scid;
-  }
-
-  if (data.eventConversionType === 'WEB') {
+  if (data.eventConversionType === 'WEB' && !data.notSetBrowserIdCookie) {
     return createUUID();
   }
 
@@ -1158,6 +1145,22 @@ function isConsentGivenOrNotRequired() {
 function isValidValue(value) {
   const valueType = getType(value);
   return valueType !== 'null' && valueType !== 'undefined' && value !== '';
+}
+
+function determinateIsLoggingEnabled() {
+  if (!data.logType) {
+    return isDebug;
+  }
+
+  if (data.logType === 'no') {
+    return false;
+  }
+
+  if (data.logType === 'debug') {
+    return isDebug;
+  }
+
+  return data.logType === 'always';
 }
 
 
@@ -1487,8 +1490,86 @@ ___SERVER_PERMISSIONS___
 
 ___TESTS___
 
-scenarios: []
-setup: ''
+scenarios:
+- name: Browser ID cookie must NOT be set if checkbox is enabled
+  code: |-
+    mockData.notSetBrowserIdCookie = true;
+
+    const scidValue = 'scid';
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB',
+      _scid: scidValue,
+      //click_id: 'clickid'
+    });
+
+
+    mock('setCookie', (name, value, options, encode) => {
+      if (name === '_scid' && value === scidValue) fail('_scid cookie must not be set when the checkbox is enabled.');
+    });
+
+    runCode(mockData);
+- name: Browser ID parameter is NOT auto-generated and IS set on the request if it
+    comes from other source and if checkbox is enabled
+  code: |-
+    mockData.notSetBrowserIdCookie = true;
+
+    const scidValue = 'scid';
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB',
+      _scid: scidValue,
+      //click_id: 'clickid'
+    });
+
+
+    mock('sendHttpRequest', (url, callback, headers, body) => {
+      const bodyParsed = JSON.parse(body);
+      assertThat(bodyParsed.data[0].user_data.sc_cookie1).isEqualTo(scidValue);
+    });
+
+    runCode(mockData);
+- name: Browser ID parameter is NOT auto-generated and is NOT set on the request if
+    it no other sources contains its value and if checkbox is enabled
+  code: |-
+    mockData.notSetBrowserIdCookie = true;
+
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB'
+    });
+
+    mock('sendHttpRequest', (url, callback, headers, body) => {
+      const bodyParsed = JSON.parse(body);
+      assertThat(bodyParsed.data[0].user_data.sc_cookie1).isUndefined();
+    });
+
+    runCode(mockData);
+- name: Browser ID cookie must be set if checkbox is disabled
+  code: |-
+    const scidValue = 'scid';
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB',
+      _scid: scidValue,
+      //click_id: 'clickid'
+    });
+
+
+    mock('setCookie', (name, value, options, encode) => {
+      assertThat(name).isEqualTo('_scid');
+      assertThat(value).isEqualTo(scidValue);
+    });
+
+    runCode(mockData);
+setup: |-
+  const setCookie = require('setCookie');
+  const JSON = require('JSON');
+
+  const mockData = {
+    pixelId: '123123123',
+    accessToken: 'accessToken123'
+  };
 
 
 ___NOTES___

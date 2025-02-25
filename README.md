@@ -10,9 +10,10 @@ Snapchat conversion API tag for Google Tag Manager server container allows sendi
 
 Snapchat CAPI tag automatically normalized and hashed with lowercase hex SHA256 format. All user parameters (plain text email, mobile identifier, IP address, and phone number).
 
-Tag supports event deduplication.
+The tag supports event deduplication.
 
 ### Getting started
+
 According to Snap Marketing API, it is required to use Access Token to send events to Snap server.
 
 ### To use this tag, you'll need:
@@ -26,4 +27,4 @@ According to Snap Marketing API, it is required to use Access Token to send even
 
 ## Open Source
 
-Snapchat Tag for GTM Server Side is developing and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.
+Snapchat Tag for GTM Server Side is developed and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.
