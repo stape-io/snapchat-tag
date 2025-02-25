@@ -1,7 +1,7 @@
 homepage: "https://stape.io/"
 versions:
-  - sha: a2d8ecc7957ee7d01012ab7543569b5c7218e730
-    changeNotes: Set Browser ID cookie optionally.
+  - sha: 74c360803e598eab8146b3aed6d2ef5030fa9b16
+    changeNotes: Set Browser ID cookie optionally based on user preference.
   - sha: 46d3affa54edf6955b14df166237884cfeda7552
     changeNotes: Set click id cookie optionally.
   - sha: 1bb3648e86c1e6586c0169097f1d49b6725203be
