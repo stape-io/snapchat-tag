@@ -1493,8 +1493,6 @@ ___TESTS___
 scenarios:
 - name: Browser ID cookie must NOT be set if checkbox is enabled
   code: |-
-    const setCookie = require('setCookie');
-
     mockData.notSetBrowserIdCookie = true;
 
     const scidValue = 'scid';
@@ -1511,11 +1509,9 @@ scenarios:
     });
 
     runCode(mockData);
-- name: Browser ID parameter is NOT auto-generated and CAN be set on the request if
-    checkbox is enabled
+- name: Browser ID parameter is NOT auto-generated and IS set on the request if it
+    comes from other source and if checkbox is enabled
   code: |-
-    const JSON = require('JSON');
-
     mockData.notSetBrowserIdCookie = true;
 
     const scidValue = 'scid';
@@ -1533,10 +1529,24 @@ scenarios:
     });
 
     runCode(mockData);
+- name: Browser ID parameter is NOT auto-generated and is NOT set on the request if
+    it no other sources contains its value and if checkbox is enabled
+  code: |-
+    mockData.notSetBrowserIdCookie = true;
+
+    mock('getAllEventData', {
+      event_name: 'purchase',
+      eventConversionType: 'WEB'
+    });
+
+    mock('sendHttpRequest', (url, callback, headers, body) => {
+      const bodyParsed = JSON.parse(body);
+      assertThat(bodyParsed.data[0].user_data.sc_cookie1).isUndefined();
+    });
+
+    runCode(mockData);
 - name: Browser ID cookie must be set if checkbox is disabled
   code: |-
-    const setCookie = require('setCookie');
-
     const scidValue = 'scid';
     mock('getAllEventData', {
       event_name: 'purchase',
@@ -1553,6 +1563,9 @@ scenarios:
 
     runCode(mockData);
 setup: |-
+  const setCookie = require('setCookie');
+  const JSON = require('JSON');
+
   const mockData = {
     pixelId: '123123123',
     accessToken: 'accessToken123'
