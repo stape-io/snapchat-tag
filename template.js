@@ -24,7 +24,6 @@ const traceId = getRequestHeader('trace-id');
 const eventData = getAllEventData();
 const url = eventData.page_location || getRequestHeader('referer');
 
-
 if (!isConsentGivenOrNotRequired()) {
   return data.gtmOnSuccess();
 }
