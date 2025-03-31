@@ -14,7 +14,7 @@ The tag supports event deduplication.
 
 ### Getting started
 
-According to Snap Marketing API, it is required to use Access Token to send events to Snap server.
+According to Snap Marketing API, it is required to use Access Token to send events to Snapchat server.
 
 ### To use this tag, you'll need:
 
