@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: 054877764aeddf11387157b0f4f159d40d6d8c00
+    changeNotes: Add support for BigQuery logging.
   - sha: 870121ce1fd0b798d00d917ec3313834c30d5f85
     changeNotes: Set Browser ID cookie optionally based on user preference.
   - sha: 46d3affa54edf6955b14df166237884cfeda7552
