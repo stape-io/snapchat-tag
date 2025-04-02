@@ -1,5 +1,7 @@
 homepage: "https://stape.io/"
 versions:
+  - sha: d1fdfc9654af3a7d69bd16f26991649f44d0a968
+    changeNotes: Improve JSON handling for BQ logging.
   - sha: 054877764aeddf11387157b0f4f159d40d6d8c00
     changeNotes: Add support for BigQuery logging.
   - sha: 870121ce1fd0b798d00d917ec3313834c30d5f85
