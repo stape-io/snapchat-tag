@@ -1,5 +1,8 @@
 homepage: "https://stape.io/"
+documentation: "https://github.com/stape-io/snapchat-tag"
 versions:
+  - sha: d6038c2318ccf50e22ce97ab5ac57fb758fba739
+    changeNotes: Remove some comments. Improve tests.
   - sha: d1fdfc9654af3a7d69bd16f26991649f44d0a968
     changeNotes: Improve JSON handling for BQ logging.
   - sha: 054877764aeddf11387157b0f4f159d40d6d8c00
