@@ -1220,7 +1220,7 @@ function isHashed(value) {
   return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
 }
 
-function isConsentGivenOrNotRequired() {
+function isConsentGivenOrNotRequired(data,eventData) {
   if (data.adStorageConsent !== 'required') return true;
   if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
