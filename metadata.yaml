@@ -1,6 +1,8 @@
-homepage: "https://stape.io/"
-documentation: "https://github.com/stape-io/snapchat-tag"
+homepage: 'https://stape.io/'
+documentation: 'https://github.com/stape-io/snapchat-tag'
 versions:
+  - sha: 35f51faff2edac2f346bdad408c16464fbea28be
+    changeNotes: Update consent section.
   - sha: d6038c2318ccf50e22ce97ab5ac57fb758fba739
     changeNotes: Remove some comments. Improve tests.
   - sha: d1fdfc9654af3a7d69bd16f26991649f44d0a968

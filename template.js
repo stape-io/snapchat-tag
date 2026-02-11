@@ -1,29 +1,30 @@
-const getAllEventData = require('getAllEventData');
-const JSON = require('JSON');
-const sendHttpRequest = require('sendHttpRequest');
-const getTimestampMillis = require('getTimestampMillis');
-const setCookie = require('setCookie');
-const getCookieValues = require('getCookieValues');
-const getContainerVersion = require('getContainerVersion');
-const logToConsole = require('logToConsole');
-const sha256Sync = require('sha256Sync');
-const makeString = require('makeString');
-const getRequestHeader = require('getRequestHeader');
-const getType = require('getType');
-const Math = require('Math');
-const generateRandom = require('generateRandom');
-const parseUrl = require('parseUrl');
-const makeNumber = require('makeNumber');
-const encodeUriComponent = require('encodeUriComponent');
 const BigQuery = require('BigQuery');
+const encodeUriComponent = require('encodeUriComponent');
+const generateRandom = require('generateRandom');
+const getAllEventData = require('getAllEventData');
+const getContainerVersion = require('getContainerVersion');
+const getCookieValues = require('getCookieValues');
+const getRequestHeader = require('getRequestHeader');
+const getTimestampMillis = require('getTimestampMillis');
+const getType = require('getType');
+const JSON = require('JSON');
+const logToConsole = require('logToConsole');
+const makeNumber = require('makeNumber');
+const makeString = require('makeString');
+const Math = require('Math');
+const parseUrl = require('parseUrl');
+const sendHttpRequest = require('sendHttpRequest');
+const setCookie = require('setCookie');
+const sha256Sync = require('sha256Sync');
 
-/**********************************************************************************************/
+/*==============================================================================
+==============================================================================*/
 
 const traceId = getRequestHeader('trace-id');
 
 const eventData = getAllEventData();
 
-if (!isConsentGivenOrNotRequired()) {
+if (!isConsentGivenOrNotRequired(data, eventData)) {
   return data.gtmOnSuccess();
 }
 
@@ -45,8 +46,9 @@ if (data.useOptimisticScenario) {
   data.gtmOnSuccess();
 }
 
-/**********************************************************************************************/
-// Vendor related functions
+/*==============================================================================
+Vendor related functions
+==============================================================================*/
 
 function sendTrackRequest(mappedEvent) {
   const postBody = {
@@ -193,9 +195,12 @@ function addCustomData(eventData, mappedData) {
     mappedData.custom_data.num_items = eventData.items.length;
 
     if (!eventData.items[1]) {
-      if (eventData.items[0].item_name) mappedData.custom_data.content_name = eventData.items[0].item_name;
-      if (eventData.items[0].item_category) mappedData.custom_data.content_category = eventData.items[0].item_category;
-      if (eventData.items[0].item_id) mappedData.custom_data.content_ids = eventData.items[0].item_id;
+      if (eventData.items[0].item_name)
+        mappedData.custom_data.content_name = eventData.items[0].item_name;
+      if (eventData.items[0].item_category)
+        mappedData.custom_data.content_category = eventData.items[0].item_category;
+      if (eventData.items[0].item_id)
+        mappedData.custom_data.content_ids = eventData.items[0].item_id;
 
       if (eventData.items[0].price) {
         mappedData.custom_data.value = eventData.items[0].quantity
@@ -233,7 +238,8 @@ function addCustomData(eventData, mappedData) {
 
   if (mappedData.event_name === 'Purchase') {
     if (!mappedData.custom_data.currency) mappedData.custom_data.currency = 'USD';
-    if (!mappedData.custom_data.value) mappedData.custom_data.value = valueFromItems ? valueFromItems : 0;
+    if (!mappedData.custom_data.value)
+      mappedData.custom_data.value = valueFromItems ? valueFromItems : 0;
   }
   if (eventData.predicted_ltv) mappedData.custom_data.predicted_ltv = eventData.predicted_ltv;
   if (eventData.sign_up_method) mappedData.custom_data.sign_up_method = eventData.sign_up_method;
@@ -261,8 +267,10 @@ function addAppData(eventData, mappedData) {
   const extinfo = data.extinfo || appData.extinfo;
   if (extinfo) mappedData.app_data.extinfo = extinfo;
 
-  const advertiser_tracking_enabled = data.advertiserTrackingEnabled || appData.advertiser_tracking_enabled;
-  if (advertiser_tracking_enabled) mappedData.app_data.advertiser_tracking_enabled = advertiser_tracking_enabled;
+  const advertiser_tracking_enabled =
+    data.advertiserTrackingEnabled || appData.advertiser_tracking_enabled;
+  if (advertiser_tracking_enabled)
+    mappedData.app_data.advertiser_tracking_enabled = advertiser_tracking_enabled;
 
   if (data.appDataList) {
     data.appDataList.forEach((d) => {
@@ -363,7 +371,8 @@ function addUserData(eventData, mappedData) {
   else if (eventData.userId) mappedData.user_data.external_id = eventData.userId;
 
   if (eventData.subscription_id) mappedData.user_data.subscription_id = eventData.subscription_id;
-  else if (eventData.subscriptionId) mappedData.user_data.subscription_id = eventData.subscriptionId;
+  else if (eventData.subscriptionId)
+    mappedData.user_data.subscription_id = eventData.subscriptionId;
 
   if (eventData.lead_id) mappedData.user_data.lead_id = eventData.lead_id;
   else if (eventData.leadId) mappedData.user_data.lead_id = eventData.leadId;
@@ -410,7 +419,10 @@ function addUserData(eventData, mappedData) {
   if (eventData.gender) mappedData.user_data.ge = eventData.gender;
 
   if (eventData.ip_override) {
-    mappedData.user_data.client_ip_address = eventData.ip_override.split(' ').join('').split(',')[0];
+    mappedData.user_data.client_ip_address = eventData.ip_override
+      .split(' ')
+      .join('')
+      .split(',')[0];
   }
 
   if (data.userDataList) {
@@ -442,7 +454,8 @@ function createUUID() {
 }
 
 function getSCID() {
-  const scid = getCookieValues('_scid')[0] || commonCookie._scid || eventData._scid || eventData.scid;
+  const scid =
+    getCookieValues('_scid')[0] || commonCookie._scid || eventData._scid || eventData.scid;
   if (scid) {
     return scid;
   }
@@ -463,15 +476,16 @@ function getClickId() {
   return getCookieValues('_scclid')[0] || commonCookie._scclid;
 }
 
-/**********************************************************************************************/
-// Helpers
+/*==============================================================================
+Helpers
+==============================================================================*/
 
 function isHashed(value) {
   if (!value) return false;
   return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
 }
 
-function isConsentGivenOrNotRequired() {
+function isConsentGivenOrNotRequired(data, eventData) {
   if (data.adStorageConsent !== 'required') return true;
   if (eventData.consent_state) return !!eventData.consent_state.ad_storage;
   const xGaGcs = eventData['x-ga-gcs'] || ''; // x-ga-gcs is a string like "G110"
@@ -539,13 +553,17 @@ function logToBigQuery(dataToLog) {
     dataToLog[p] = JSON.stringify(dataToLog[p]);
   });
 
-  const bigquery = getType(BigQuery) === 'function' ? BigQuery() /* Only during Unit Tests */ : BigQuery;
+  const bigquery =
+    getType(BigQuery) === 'function' ? BigQuery() /* Only during Unit Tests */ : BigQuery;
   bigquery.insert(connectionInfo, [dataToLog], { ignoreUnknownValues: true });
 }
 
 function determinateIsLoggingEnabled() {
   const containerVersion = getContainerVersion();
-  const isDebug = !!(containerVersion && (containerVersion.debugMode || containerVersion.previewMode));
+  const isDebug = !!(
+    containerVersion &&
+    (containerVersion.debugMode || containerVersion.previewMode)
+  );
 
   if (!data.logType) {
     return isDebug;
