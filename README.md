@@ -28,3 +28,6 @@ According to Snap Marketing API, it is required to use Access Token to send even
 ## Open Source
 
 Snapchat Tag for GTM Server Side is developed and maintained by [Stape Team](https://stape.io/) under the Apache 2.0 license.
+
+### GTM Gallery Status
+🟢 [Listed](https://tagmanager.google.com/gallery/#/owners/stape-io/templates/snapchat-tag)
