@@ -1,6 +1,8 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/snapchat-tag'
 versions:
+  - sha: 9791a84652b1e914c191eb2495b3ead73b134bed
+    changeNotes: Logging removal. Added automapping toggles.
   - sha: 35f51faff2edac2f346bdad408c16464fbea28be
     changeNotes: Update consent section.
   - sha: d6038c2318ccf50e22ce97ab5ac57fb758fba739

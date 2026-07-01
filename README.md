@@ -1,6 +1,6 @@
 # Snapchat Conversions API Tag for Google Tag Manager Server Container
 
-Snapchat conversion API tag for Google Tag Manager server container allows sending site or app events and parameters directly to Snapchat server using [Snap Marketing API](https://marketingapi.snapchat.com/docs/#introduction).
+Snapchat Conversion API tag for Google Tag Manager server container allows sending site or app events and parameters directly to Snapchat server using [Snap Marketing API](https://marketingapi.snapchat.com/docs/#introduction).
 
 ### There are three ways of sending events:
 
