@@ -1,3 +1,5 @@
+const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
+const createRegex = require('createRegex');
 const encodeUriComponent = require('encodeUriComponent');
 const generateRandom = require('generateRandom');
 const getAllEventData = require('getAllEventData');
@@ -23,13 +25,18 @@ const eventData = getAllEventData();
 
 if (shouldExitEarly(data, eventData)) return;
 
+const WHITESPACE_REGEX = createRegex('[\\s\\p{Z}]', 'g');
+const PUNCTUATION_REGEX = createRegex('[\\p{P}\\p{S}]', 'g');
+const NON_DIGITS_REGEX = createRegex('[^0-9]', 'g');
+const ZIP_SEPARATORS_REGEX = createRegex('[\\s\\p{Z}\\p{Pd}]', 'g');
+
 const pixelOrAppId = data.eventConversionType === 'MOBILE_APP' ? data.snapAppId : data.pixelId;
 if (!pixelOrAppId || !data.accessToken) {
   return data.gtmOnFailure();
 }
 
 const mappedEvent = mapEvent(data, eventData);
-setIDsCookies(data, mappedEvent.user_data.sc_click_id, mappedEvent.user_data.sc_cookie1);
+setIDsCookies(data, eventData, mappedEvent.user_data.sc_click_id, mappedEvent.user_data.sc_cookie1);
 sendTrackRequest(mappedEvent);
 
 if (data.useOptimisticScenario) {
@@ -40,14 +47,14 @@ if (data.useOptimisticScenario) {
 Vendor related functions
 ==============================================================================*/
 
-function setIDsCookies(data, ssclid, scid) {
+function setIDsCookies(data, eventData, ssclid, scid) {
   const cookieOptions = {
-    domain: 'auto',
+    domain: getCookieDomain(data.cookieDomain, eventData),
     path: '/',
-    samesite: 'Lax',
+    samesite: data.cookieSameSite || 'Lax',
     secure: true,
     'max-age': 31536000, // 1 year
-    httpOnly: !!data.useHttpOnlyCookie
+    httpOnly: isUIFieldTrue(data.useHttpOnlyCookie)
   };
 
   if (ssclid && !data.notSetClickIdCookie) {
@@ -215,7 +222,7 @@ function addCustomData(eventData, mappedData) {
 
     if (eventData.transaction_id) mappedData.custom_data.order_id = eventData.transaction_id;
 
-    if (mappedData.event_name === 'Purchase') {
+    if (mappedData.event_name === 'PURCHASE') {
       if (!mappedData.custom_data.currency) mappedData.custom_data.currency = 'USD';
       if (!mappedData.custom_data.value)
         mappedData.custom_data.value = valueFromItems ? valueFromItems : 0;
@@ -300,12 +307,29 @@ function addServerData(eventData, mappedData) {
 }
 
 function hashDataIfNeeded(mappedData) {
-  const fieldsToHash = ['em', 'ph', 'fn', 'ln', 'ge', 'ct', 'st', 'zp', 'country', 'external_id'];
-  for (let key in mappedData.user_data) {
-    if (fieldsToHash.indexOf(key) !== -1) {
-      mappedData.user_data[key] = hashData(mappedData.user_data[key]);
+  const userData = mappedData.user_data;
+  const fieldsToNormalize = {
+    em: normalizeLowercase,
+    ph: normalizePhone,
+    fn: normalizeName,
+    ln: normalizeName,
+    ge: normalizeGender,
+    ct: normalizeCityOrState,
+    st: normalizeCityOrState,
+    zp: normalizeZip,
+    country: normalizeLowercase,
+    external_id: normalizeLowercase
+  };
+
+  Object.keys(fieldsToNormalize).forEach((key) => {
+    if (userData.hasOwnProperty(key)) {
+      userData[key] = hashData(userData[key], fieldsToNormalize[key]);
     }
-  }
+  });
+
+  // Not hashed, but Snap requires it to be lowercase.
+  if (getType(userData.madid) === 'string') userData.madid = userData.madid.toLowerCase();
+
   return mappedData;
 }
 
@@ -456,7 +480,7 @@ function getClickId(eventData) {
   return clickId;
 }
 
-function hashData(value) {
+function hashData(value, normalize) {
   if (!value) return value;
 
   const type = getType(value);
@@ -464,21 +488,78 @@ function hashData(value) {
   if (value === 'undefined' || value === 'null') return undefined;
 
   if (type === 'array') {
-    return value.map((val) => hashData(val));
+    const hashedValues = value
+      .map((val) => hashData(val, normalize))
+      .filter((val) => val !== undefined);
+    return hashedValues.length ? hashedValues : undefined;
   }
 
   if (type === 'object') {
     return Object.keys(value).reduce((acc, val) => {
-      acc[val] = hashData(value[val]);
+      acc[val] = hashData(value[val], normalize);
       return acc;
     }, {});
   }
 
   if (isHashed(value)) return value;
 
-  return sha256Sync(makeString(value).trim().toLowerCase(), {
+  const normalizedValue = normalize(makeString(value));
+  if (!normalizedValue) return undefined;
+
+  return sha256Sync(normalizedValue, {
     outputEncoding: 'hex'
   });
+}
+
+function removeMatches(value, regex) {
+  if (!regex || getType(value) !== 'string') return undefined;
+  return value.replace(regex, '');
+}
+
+function removeWhitespace(value) {
+  return removeMatches(value, WHITESPACE_REGEX);
+}
+
+function removePunctuation(value) {
+  return removeMatches(value, PUNCTUATION_REGEX);
+}
+
+function onlyDigits(value) {
+  return removeMatches(value, NON_DIGITS_REGEX);
+}
+
+function normalizeLowercase(value) {
+  return value.trim().toLowerCase();
+}
+
+function normalizePhone(value) {
+  let phone = onlyDigits(value);
+  if (!phone) return phone;
+  while (phone.length && phone.charAt(0) === '0') phone = phone.substring(1);
+  return phone;
+}
+
+function normalizeName(value) {
+  return removePunctuation(normalizeLowercase(value));
+}
+
+function normalizeGender(value) {
+  const gender = normalizeLowercase(value);
+  if (gender === 'female') return 'f';
+  if (gender === 'male') return 'm';
+  return gender;
+}
+
+function normalizeCityOrState(value) {
+  return removeWhitespace(removePunctuation(normalizeLowercase(value)));
+}
+
+function normalizeZip(value) {
+  const zip = removeMatches(normalizeLowercase(value), ZIP_SEPARATORS_REGEX);
+  if (!zip) return zip;
+  // US ZIP+4 (e.g. 98101-1234): keep only the first 5 digits.
+  if (zip.length === 9 && onlyDigits(zip) === zip) return zip.substring(0, 5);
+  return zip;
 }
 
 /*==============================================================================
@@ -502,6 +583,16 @@ function shouldExitEarly(data, eventData) {
   }
 }
 
+function getCookieDomain(cookieDomain, eventData) {
+  return !cookieDomain || cookieDomain === 'auto'
+    ? computeEffectiveTldPlusOne(eventData.page_location || getRequestHeader('referer')) || 'auto'
+    : cookieDomain;
+}
+
+function isUIFieldTrue(field) {
+  return [true, 'true'].indexOf(field) !== -1;
+}
+
 function isHashed(value) {
   if (!value) return false;
   return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
@@ -516,5 +607,6 @@ function isConsentGivenOrNotRequired(data, eventData) {
 
 function isValidValue(value) {
   const valueType = getType(value);
-  return valueType !== 'null' && valueType !== 'undefined' && value !== '' && value === value;
+  if (valueType === 'null' || valueType === 'undefined' || value !== value) return false;
+  return value !== '' && value !== 'undefined' && value !== 'null';
 }

@@ -308,10 +308,10 @@ ___TEMPLATE_PARAMETERS___
       },
       {
         "type": "CHECKBOX",
-        "name": "useHttpOnlyCookie",
-        "checkboxText": "Use HttpOnly cookies",
+        "name": "validate",
+        "checkboxText": "Test Mode",
         "simpleValueType": true,
-        "help": "Forbids JavaScript from accessing the cookie if enabled."
+        "help": "If enabled conversion request will be sent to /v3/{{asset_id}}/events/validate \u003ca href\u003d\"https://docs.snap.com/api/marketing-api/Conversions-API/VerifySetUp\"\u003emore info\u003c/a\u003e"
       },
       {
         "type": "CHECKBOX",
@@ -319,29 +319,86 @@ ___TEMPLATE_PARAMETERS___
         "checkboxText": "Use Optimistic Scenario",
         "simpleValueType": true,
         "help": "The tag will call gtmOnSuccess() without waiting for a response from the API. This will speed up sGTM response time however your tag will always return the status fired successfully even in case it is not."
+      }
+    ]
+  },
+  {
+    "type": "GROUP",
+    "name": "cookieSettingsGroup",
+    "displayName": "Cookie Settings",
+    "groupStyle": "ZIPPY_CLOSED",
+    "subParams": [
+        {
+          "type": "CHECKBOX",
+          "name": "notSetClickIdCookie",
+          "checkboxText": "Do not set Click ID (_scclid) cookie",
+          "simpleValueType": true,
+          "help": "Do not set Click ID (_scclid) cookie if it was added to user data.",
+          "defaultValue": false
+        },
+        {
+          "type": "CHECKBOX",
+          "name": "notSetBrowserIdCookie",
+          "checkboxText": "Do not set Browser ID (_scid) cookie",
+          "simpleValueType": true,
+          "help": "Do not set Browser ID (_scid) cookie if it was added to user data.\n\u003cbr\u003e\nDo not auto-generate it.\n\u003cbr\u003e\nIf an existing Browser ID is found, it will still be sent in the request but not stored as a cookie. It can be sourced from:\u003cul\u003e\n\u003cli\u003ean already existing \u003ci\u003e_scid\u003c/i\u003e cookie\u003c/li\u003e\n\u003cli\u003eEvent Data parameters: \u003ci\u003ecommonCookie._scid\u003c/i\u003e, \u003ci\u003escid\u003c/i\u003e or \u003ci\u003e_scid\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e",
+          "defaultValue": false
+        },
+      {
+        "type": "TEXT",
+        "name": "cookieDomain",
+        "displayName": "Cookie Domain",
+        "simpleValueType": true,
+        "valueHint": "example.com",
+        "help": "Use this option to override the cookie domain. \n\u003cbr\u003e \nEnter your website\u0027s top-level domain as a fixed value (e.g., example.com). \n\u003cbr\u003e\n If left empty or using the \"auto\" value, the domain will be automatically determined using the following priority: \u003cul\u003e \n\u003cli\u003eDomain of the \u003ci\u003epage_location\u003c/i\u003e Event Data parameter (if present).\u003c/li\u003e\n\u003cli\u003eDomain of the \u003ci\u003eReferer\u003c/i\u003e header (if present).\u003c/li\u003e\n\u003cli\u003eDomain of the \u003ci\u003eForwarded\u003c/i\u003e header (if present).\u003c/li\u003e\n\u003cli\u003eDomain of the \u003ci\u003eX-Forwarded-Host\u003c/i\u003e header (if present).\u003c/li\u003e\n\u003cli\u003eDomain of the \u003ci\u003eHost\u003c/i\u003e header.\u003c/li\u003e\n\u003c/ul\u003e",
+        "defaultValue": "auto",
+        "valueValidators": [
+          {
+            "type": "NON_EMPTY"
+          }
+        ]
       },
       {
-        "type": "CHECKBOX",
-        "name": "notSetClickIdCookie",
-        "checkboxText": "Do not set Click ID (_scclid) cookie",
+        "type": "SELECT",
+        "name": "cookieSameSite",
+        "displayName": "Cookie SameSite",
+        "macrosInSelect": false,
+        "selectItems": [
+          {
+            "value": "none",
+            "displayValue": "None"
+          },
+          {
+            "value": "lax",
+            "displayValue": "Lax"
+          },
+          {
+            "value": "strict",
+            "displayValue": "Strict"
+          }
+        ],
         "simpleValueType": true,
-        "help": "Do not set Click ID (_scclid) cookie if it was added to user data.",
-        "defaultValue": false
+        "help": "\u003ca href\u003d\"https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie#samesitesamesite-value\"\u003eLearn more\u003c/a\u003e.",
+        "defaultValue": "lax"
       },
       {
-        "type": "CHECKBOX",
-        "name": "notSetBrowserIdCookie",
-        "checkboxText": "Do not set Browser ID (_scid) cookie",
+        "type": "SELECT",
+        "name": "useHttpOnlyCookie",
+        "displayName": "Use HttpOnly cookies",
+        "macrosInSelect": true,
+        "selectItems": [
+          {
+            "value": false,
+            "displayValue": "false"
+          },
+          {
+            "value": true,
+            "displayValue": "true"
+          }
+        ],
         "simpleValueType": true,
-        "help": "Do not set Browser ID (_scid) cookie if it was added to user data.\n\u003cbr\u003e\nDo not auto-generate it.\n\u003cbr\u003e\nIf an existing Browser ID is found, it will still be sent in the request but not stored as a cookie. It can be sourced from:\u003cul\u003e\n\u003cli\u003ean already existing \u003ci\u003e_scid\u003c/i\u003e cookie\u003c/li\u003e\n\u003cli\u003eEvent Data parameters: \u003ci\u003ecommonCookie._scid\u003c/i\u003e, \u003ci\u003escid\u003c/i\u003e or \u003ci\u003e_scid\u003c/i\u003e\u003c/li\u003e\n\u003c/ul\u003e",
-        "defaultValue": false
-      },
-      {
-        "type": "CHECKBOX",
-        "name": "validate",
-        "checkboxText": "Test Mode",
-        "simpleValueType": true,
-        "help": "If enabled conversion request will be sent to /v3/{{asset_id}}/events/validate \u003ca href\u003d\"https://docs.snap.com/api/marketing-api/Conversions-API/VerifySetUp\"\u003emore info\u003c/a\u003e"
+        "notSetText": "(not set)",
+        "help": "Forbids JavaScript from accessing the cookie if \u003ci\u003etrue\u003c/i\u003e."
       }
     ]
   },
@@ -671,6 +728,8 @@ ___TEMPLATE_PARAMETERS___
 
 ___SANDBOXED_JS_FOR_SERVER___
 
+const computeEffectiveTldPlusOne = require('computeEffectiveTldPlusOne');
+const createRegex = require('createRegex');
 const encodeUriComponent = require('encodeUriComponent');
 const generateRandom = require('generateRandom');
 const getAllEventData = require('getAllEventData');
@@ -696,13 +755,18 @@ const eventData = getAllEventData();
 
 if (shouldExitEarly(data, eventData)) return;
 
+const WHITESPACE_REGEX = createRegex('[\\s\\p{Z}]', 'g');
+const PUNCTUATION_REGEX = createRegex('[\\p{P}\\p{S}]', 'g');
+const NON_DIGITS_REGEX = createRegex('[^0-9]', 'g');
+const ZIP_SEPARATORS_REGEX = createRegex('[\\s\\p{Z}\\p{Pd}]', 'g');
+
 const pixelOrAppId = data.eventConversionType === 'MOBILE_APP' ? data.snapAppId : data.pixelId;
 if (!pixelOrAppId || !data.accessToken) {
   return data.gtmOnFailure();
 }
 
 const mappedEvent = mapEvent(data, eventData);
-setIDsCookies(data, mappedEvent.user_data.sc_click_id, mappedEvent.user_data.sc_cookie1);
+setIDsCookies(data, eventData, mappedEvent.user_data.sc_click_id, mappedEvent.user_data.sc_cookie1);
 sendTrackRequest(mappedEvent);
 
 if (data.useOptimisticScenario) {
@@ -713,14 +777,14 @@ if (data.useOptimisticScenario) {
 Vendor related functions
 ==============================================================================*/
 
-function setIDsCookies(data, ssclid, scid) {
+function setIDsCookies(data, eventData, ssclid, scid) {
   const cookieOptions = {
-    domain: 'auto',
+    domain: getCookieDomain(data.cookieDomain, eventData),
     path: '/',
-    samesite: 'Lax',
+    samesite: data.cookieSameSite || 'Lax',
     secure: true,
     'max-age': 31536000, // 1 year
-    httpOnly: !!data.useHttpOnlyCookie
+    httpOnly: isUIFieldTrue(data.useHttpOnlyCookie)
   };
 
   if (ssclid && !data.notSetClickIdCookie) {
@@ -888,7 +952,7 @@ function addCustomData(eventData, mappedData) {
 
     if (eventData.transaction_id) mappedData.custom_data.order_id = eventData.transaction_id;
 
-    if (mappedData.event_name === 'Purchase') {
+    if (mappedData.event_name === 'PURCHASE') {
       if (!mappedData.custom_data.currency) mappedData.custom_data.currency = 'USD';
       if (!mappedData.custom_data.value)
         mappedData.custom_data.value = valueFromItems ? valueFromItems : 0;
@@ -973,12 +1037,29 @@ function addServerData(eventData, mappedData) {
 }
 
 function hashDataIfNeeded(mappedData) {
-  const fieldsToHash = ['em', 'ph', 'fn', 'ln', 'ge', 'ct', 'st', 'zp', 'country', 'external_id'];
-  for (let key in mappedData.user_data) {
-    if (fieldsToHash.indexOf(key) !== -1) {
-      mappedData.user_data[key] = hashData(mappedData.user_data[key]);
+  const userData = mappedData.user_data;
+  const fieldsToNormalize = {
+    em: normalizeLowercase,
+    ph: normalizePhone,
+    fn: normalizeName,
+    ln: normalizeName,
+    ge: normalizeGender,
+    ct: normalizeCityOrState,
+    st: normalizeCityOrState,
+    zp: normalizeZip,
+    country: normalizeLowercase,
+    external_id: normalizeLowercase
+  };
+
+  Object.keys(fieldsToNormalize).forEach((key) => {
+    if (userData.hasOwnProperty(key)) {
+      userData[key] = hashData(userData[key], fieldsToNormalize[key]);
     }
-  }
+  });
+
+  // Not hashed, but Snap requires it to be lowercase.
+  if (getType(userData.madid) === 'string') userData.madid = userData.madid.toLowerCase();
+
   return mappedData;
 }
 
@@ -1129,7 +1210,7 @@ function getClickId(eventData) {
   return clickId;
 }
 
-function hashData(value) {
+function hashData(value, normalize) {
   if (!value) return value;
 
   const type = getType(value);
@@ -1137,21 +1218,78 @@ function hashData(value) {
   if (value === 'undefined' || value === 'null') return undefined;
 
   if (type === 'array') {
-    return value.map((val) => hashData(val));
+    const hashedValues = value
+      .map((val) => hashData(val, normalize))
+      .filter((val) => val !== undefined);
+    return hashedValues.length ? hashedValues : undefined;
   }
 
   if (type === 'object') {
     return Object.keys(value).reduce((acc, val) => {
-      acc[val] = hashData(value[val]);
+      acc[val] = hashData(value[val], normalize);
       return acc;
     }, {});
   }
 
   if (isHashed(value)) return value;
 
-  return sha256Sync(makeString(value).trim().toLowerCase(), {
+  const normalizedValue = normalize(makeString(value));
+  if (!normalizedValue) return undefined;
+
+  return sha256Sync(normalizedValue, {
     outputEncoding: 'hex'
   });
+}
+
+function removeMatches(value, regex) {
+  if (!regex || getType(value) !== 'string') return undefined;
+  return value.replace(regex, '');
+}
+
+function removeWhitespace(value) {
+  return removeMatches(value, WHITESPACE_REGEX);
+}
+
+function removePunctuation(value) {
+  return removeMatches(value, PUNCTUATION_REGEX);
+}
+
+function onlyDigits(value) {
+  return removeMatches(value, NON_DIGITS_REGEX);
+}
+
+function normalizeLowercase(value) {
+  return value.trim().toLowerCase();
+}
+
+function normalizePhone(value) {
+  let phone = onlyDigits(value);
+  if (!phone) return phone;
+  while (phone.length && phone.charAt(0) === '0') phone = phone.substring(1);
+  return phone;
+}
+
+function normalizeName(value) {
+  return removePunctuation(normalizeLowercase(value));
+}
+
+function normalizeGender(value) {
+  const gender = normalizeLowercase(value);
+  if (gender === 'female') return 'f';
+  if (gender === 'male') return 'm';
+  return gender;
+}
+
+function normalizeCityOrState(value) {
+  return removeWhitespace(removePunctuation(normalizeLowercase(value)));
+}
+
+function normalizeZip(value) {
+  const zip = removeMatches(normalizeLowercase(value), ZIP_SEPARATORS_REGEX);
+  if (!zip) return zip;
+  // US ZIP+4 (e.g. 98101-1234): keep only the first 5 digits.
+  if (zip.length === 9 && onlyDigits(zip) === zip) return zip.substring(0, 5);
+  return zip;
 }
 
 /*==============================================================================
@@ -1175,6 +1313,16 @@ function shouldExitEarly(data, eventData) {
   }
 }
 
+function getCookieDomain(cookieDomain, eventData) {
+  return !cookieDomain || cookieDomain === 'auto'
+    ? computeEffectiveTldPlusOne(eventData.page_location || getRequestHeader('referer')) || 'auto'
+    : cookieDomain;
+}
+
+function isUIFieldTrue(field) {
+  return [true, 'true'].indexOf(field) !== -1;
+}
+
 function isHashed(value) {
   if (!value) return false;
   return makeString(value).match('^[A-Fa-f0-9]{64}$') !== null;
@@ -1189,7 +1337,8 @@ function isConsentGivenOrNotRequired(data, eventData) {
 
 function isValidValue(value) {
   const valueType = getType(value);
-  return valueType !== 'null' && valueType !== 'undefined' && value !== '' && value === value;
+  if (valueType === 'null' || valueType === 'undefined' || value !== value) return false;
+  return value !== '' && value !== 'undefined' && value !== 'null';
 }
 
 
@@ -1474,106 +1623,993 @@ ___SERVER_PERMISSIONS___
 ___TESTS___
 
 scenarios:
-- name: Browser ID cookie must NOT be set if checkbox is enabled
+- name: '[Early Exit] Consent handling when ad storage consent is required'
   code: |-
-    mockData.notSetBrowserIdCookie = true;
+    [
+      { required: true, eventData: { 'x-ga-gcs': 'G100' }, sends: false },
+      { required: true, eventData: { 'x-ga-gcs': 'G110' }, sends: true },
+      { required: true, eventData: { consent_state: { ad_storage: false } }, sends: false },
+      { required: true, eventData: { consent_state: { ad_storage: true } }, sends: true },
+      { required: true, eventData: {}, sends: false },
+      { required: false, eventData: { 'x-ga-gcs': 'G100' }, sends: true }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      const copyMockData = createMockData({
+        adStorageConsent: scenario.required ? 'required' : 'optional'
+      });
 
-    const scidValue = 'scid';
-    mock('getAllEventData', {
-      event_name: 'purchase',
-      eventConversionType: 'WEB',
-      _scid: scidValue,
-      //click_id: 'clickid'
+      runCode(copyMockData);
+
+      assertThat(state.requestCount).isEqualTo(scenario.sends ? 1 : 0);
     });
 
-    mock('setCookie', (name, value, options, encode) => {
-      if (name === '_scid' && value === scidValue) fail('_scid cookie must not be set when the checkbox is enabled.');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Early Exit] Does not send the request for Google Tag Manager preview requests'
+  code: |-
+    [
+      { eventData: { page_location: 'https://gtm-msr.appspot.com/render?id=1' }, headers: {} },
+      { eventData: { page_referrer: 'https://gtm-msr.appspot.com/render?id=1' }, headers: {} },
+      { eventData: {}, headers: { referer: 'https://gtm-msr.appspot.com/render?id=1' } }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      state.headers = scenario.headers;
+
+      runCode(mockData);
+
+      assertThat(state.requestCount).isEqualTo(0);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Validation] Fails without sending when the Pixel ID, App ID or Access Token is missing'
+  code: |-
+    [
+      { pixelId: undefined },
+      { pixelId: '' },
+      { accessToken: undefined },
+      { accessToken: '' },
+      { eventConversionType: 'MOBILE_APP', snapAppId: undefined },
+      { eventConversionType: 'MOBILE_APP', pixelId: expectedPixelId }
+    ].forEach((overrides) => {
+      resetState();
+
+      runCode(createMockData(overrides));
+
+      assertThat(state.requestCount).isEqualTo(0);
+    });
+
+    assertApi('gtmOnFailure').wasCalled();
+    assertApi('gtmOnSuccess').wasNotCalled();
+- name: '[Request] URL, method, headers and body are correctly built'
+  code: |-
+    [
+      {
+        overrides: {},
+        expectedUrl: 'https://tr.snapchat.com/v3/1111111111111/events?access_token=test_token'
+      },
+      {
+        overrides: { validate: true },
+        expectedUrl:
+          'https://tr.snapchat.com/v3/1111111111111/events/validate?access_token=test_token'
+      },
+      {
+        overrides: { eventConversionType: 'MOBILE_APP', snapAppId: 'app123' },
+        expectedUrl: 'https://tr.snapchat.com/v3/app123/events?access_token=test_token'
+      }
+    ].forEach((scenario) => {
+      resetState();
+
+      runCode(createMockData(scenario.overrides));
+
+      assertThat(state.url).isEqualTo(scenario.expectedUrl);
+      assertThat(state.options.method).isEqualTo('POST');
+      assertThat(state.options.headers['Content-Type']).isEqualTo('application/json');
+      assertThat(state.body.data).hasLength(1);
+      assertThat(state.body.data[0].version).isEqualTo('3.0');
+      assertThat(state.body.data[0].event_name).isEqualTo('test_event');
+      assertThat(state.body.data[0].integration).isEqualTo('stape');
+      assertThat(state.body.data[0].action_source).isEqualTo(scenario.overrides.eventConversionType || 'WEB');
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Response] Calls gtmOnSuccess when the status code is 2xx or 3xx'
+  code: |-
+    [200, 204, 302, 399].forEach((statusCode) => {
+      mockSendHttpRequest(statusCode);
+
+      runCode(mockData);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Response] Calls gtmOnFailure when the status code is 4xx or 5xx'
+  code: |-
+    [400, 401, 500, 503].forEach((statusCode) => {
+      mockSendHttpRequest(statusCode);
+
+      runCode(mockData);
+    });
+
+    assertApi('gtmOnFailure').wasCalled();
+    assertApi('gtmOnSuccess').wasNotCalled();
+- name: '[Response] Optimistic scenario calls gtmOnSuccess without waiting for the response'
+  code: |-
+    mockSendHttpRequest(500);
+    const copyMockData = createMockData({ useOptimisticScenario: true });
+
+    runCode(copyMockData);
+
+    assertThat(state.requestCount).isEqualTo(1);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Event Name] Event name is resolved from the setup method'
+  code: |-
+    [
+      { overrides: { eventType: 'custom', eventNameCustom: 'my_event' }, eventData: {}, expected: 'my_event' },
+      { overrides: { eventType: 'standard', eventNameStandard: 'ADD_CART' }, eventData: {}, expected: 'ADD_CART' },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'page_view' }, expected: 'PAGE_VIEW' },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'add_to_cart' }, expected: 'ADD_CART' },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'purchase' }, expected: 'PURCHASE' },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'generate_lead' }, expected: 'SIGN_UP' },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'gtm4wp.orderCompletedEEC' }, expected: 'PURCHASE' },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'unmapped_event' }, expected: 'unmapped_event' }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+
+      runCode(createMockData(scenario.overrides));
+
+      assertThat(state.body.data[0].event_name).isEqualTo(scenario.expected);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Server Data] Automapping from event data'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      event_id: 'evt_1',
+      transaction_id: 'tx_1',
+      test_event_code: 'FROM_EVENT_DATA'
+    });
+    const copyMockData = createMockData({ testEventCode: 'FROM_UI' });
+
+    runCode(copyMockData);
+
+    const event = state.body.data[0];
+    assertThat(event.event_time).isEqualTo(1700000000);
+    assertThat(event.event_source_url).isEqualTo(defaultPageLocation);
+    assertThat(event.event_id).isEqualTo('evt_1');
+    assertThat(event.test_event_code).isEqualTo('FROM_EVENT_DATA');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Server Data] Automapping fallbacks'
+  code: |-
+    [
+      {
+        eventData: { transaction_id: 'tx_1' },
+        headers: { referer: 'https://referer.example.com/' },
+        overrides: { testEventCode: 'FROM_UI' },
+        expected: {
+          event_id: 'tx_1',
+          event_source_url: 'https://referer.example.com/',
+          test_event_code: 'FROM_UI'
+        }
+      },
+      {
+        eventData: { page_location: defaultPageLocation, event_id: 'evt_1' },
+        headers: {},
+        overrides: { eventConversionType: 'MOBILE_APP', snapAppId: 'app123' },
+        expected: { event_id: 'evt_1', event_source_url: undefined, test_event_code: undefined }
+      }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      state.headers = scenario.headers;
+
+      runCode(createMockData(scenario.overrides));
+
+      const event = state.body.data[0];
+      assertThat(event.event_id).isEqualTo(scenario.expected.event_id);
+      assertThat(event.event_source_url).isEqualTo(scenario.expected.event_source_url);
+      assertThat(event.test_event_code).isEqualTo(scenario.expected.test_event_code);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Server Data] Manual list overrides automapped values and skips empty values'
+  code: |-
+    mockEventData({ page_location: defaultPageLocation, event_id: 'auto_id' });
+    const copyMockData = createMockData({
+      serverDataList: [
+        { name: 'event_id', value: 'manual_id' },
+        { name: 'event_time', value: 123 },
+        { name: 'empty_string', value: '' },
+        { name: 'null_value', value: null }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const event = state.body.data[0];
+    assertThat(event.event_id).isEqualTo('manual_id');
+    assertThat(event.event_time).isEqualTo(123);
+    assertThat(event.empty_string).isUndefined();
+    assertThat(event.null_value).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Server Data] Automapping disabled keeps only the manual values'
+  code: |-
+    mockEventData({ page_location: defaultPageLocation, event_id: 'auto_id', test_event_code: 'AUTO' });
+    const copyMockData = createMockData({
+      autoMapServerData: false,
+      testEventCode: 'FROM_UI',
+      serverDataList: [{ name: 'event_time', value: 123 }]
+    });
+
+    runCode(copyMockData);
+
+    const event = state.body.data[0];
+    assertThat(event.event_time).isEqualTo(123);
+    assertThat(event.event_id).isUndefined();
+    assertThat(event.event_source_url).isUndefined();
+    assertThat(event.test_event_code).isEqualTo('FROM_UI');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[User Data] Automapping from event data, hashing and plain fields'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      email: ' Jane@Example.com ',
+      phone: '15551234567',
+      firstName: 'John',
+      lastName: 'Andrews',
+      city: 'San Francisco',
+      state: 'CA',
+      zip: '98101',
+      countryCode: 'US',
+      gender: 'f',
+      external_id: 'ext_1',
+      user_agent: 'Mozilla/5.0',
+      ip_override: '1.2.3.4, 5.6.7.8',
+      anon_id: 'anon_1',
+      madid: 'madid_1',
+      download_id: 'download_1',
+      idfv: 'idfv_1',
+      subscription_id: 'sub_1',
+      lead_id: 'lead_1'
     });
 
     runCode(mockData);
-- name: Browser ID parameter is NOT auto-generated and IS set on the request if it
-    comes from other source and if checkbox is enabled
-  code: |-
-    mockData.notSetBrowserIdCookie = true;
 
-    const scidValue = 'scid';
-    mock('getAllEventData', {
-      event_name: 'purchase',
-      eventConversionType: 'WEB',
-      _scid: scidValue,
-      //click_id: 'clickid'
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.em).isEqualTo('sha256_jane@example.com');
+    assertThat(userData.ph).isEqualTo('sha256_15551234567');
+    assertThat(userData.fn).isEqualTo('sha256_john');
+    assertThat(userData.ln).isEqualTo('sha256_andrews');
+    assertThat(userData.ct).isEqualTo('sha256_sanfrancisco');
+    assertThat(userData.st).isEqualTo('sha256_ca');
+    assertThat(userData.zp).isEqualTo('sha256_98101');
+    assertThat(userData.country).isEqualTo('sha256_us');
+    assertThat(userData.ge).isEqualTo('sha256_f');
+    assertThat(userData.external_id).isEqualTo('sha256_ext_1');
+    assertThat(state.hashOptions).isEqualTo({ outputEncoding: 'hex' });
+    assertThat(userData.client_user_agent).isEqualTo('Mozilla/5.0');
+    assertThat(userData.client_ip_address).isEqualTo('1.2.3.4');
+    assertThat(userData.anon_id).isEqualTo('anon_1');
+    assertThat(userData.madid).isEqualTo('madid_1');
+    assertThat(userData.download_id).isEqualTo('download_1');
+    assertThat(userData.idfv).isEqualTo('idfv_1');
+    assertThat(userData.subscription_id).isEqualTo('sub_1');
+    assertThat(userData.lead_id).isEqualTo('lead_1');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[User Data] Automapping from the user_data object and its address'
+  code: |-
+    const userDataFields = {
+      email_address: 'jane@example.com',
+      phone_number: '15551234567',
+      first_name: 'John',
+      last_name: 'Andrews',
+      region: 'WA',
+      postal_code: '98101',
+      country: 'US'
+    };
+    const address = { first_name: 'Ignored', city: 'Seattle' };
+
+    [
+      { address: [address] },
+      { address: address }
+    ].forEach((scenario) => {
+      resetState();
+      const copyUserData = { address: scenario.address };
+      Object.keys(userDataFields).forEach((key) => {
+        copyUserData[key] = userDataFields[key];
+      });
+      mockEventData({ page_location: defaultPageLocation, user_data: copyUserData });
+
+      runCode(mockData);
+
+      const userData = state.body.data[0].user_data;
+      assertThat(userData.em).isEqualTo('sha256_jane@example.com');
+      assertThat(userData.ph).isEqualTo('sha256_15551234567');
+      assertThat(userData.fn).isEqualTo('sha256_john');
+      assertThat(userData.ln).isEqualTo('sha256_andrews');
+      assertThat(userData.ct).isEqualTo('sha256_seattle');
+      assertThat(userData.st).isEqualTo('sha256_wa');
+      assertThat(userData.zp).isEqualTo('sha256_98101');
+      assertThat(userData.country).isEqualTo('sha256_us');
     });
 
-    mock('sendHttpRequest', (url, callback, headers, body) => {
-      const bodyParsed = JSON.parse(body);
-      assertThat(bodyParsed.data[0].user_data.sc_cookie1).isEqualTo(scidValue);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[User Data] Automapping disabled keeps only the manual values'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      email: 'auto@example.com',
+      click_id: 'auto_click_id',
+      external_id: 'auto_ext'
+    });
+    const copyMockData = createMockData({
+      autoMapUserData: false,
+      userDataList: [
+        { name: 'em', value: 'Manual@Example.com' },
+        { name: 'custom_field', value: 'Plain Value' },
+        { name: 'ph', value: '' }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.em).isEqualTo('sha256_manual@example.com');
+    assertThat(userData.custom_field).isEqualTo('Plain Value');
+    assertThat(userData.ph).isUndefined();
+    assertThat(userData.external_id).isUndefined();
+    assertThat(userData.sc_click_id).isUndefined();
+    assertThat(userData.sc_cookie1).isUndefined();
+    assertThat(Object.keys(state.cookies)).hasLength(0);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Hashing] Already hashed values are kept and invalid string values are dropped'
+  code: |-
+    const hashedEmail = 'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9';
+    const copyMockData = createMockData({
+      autoMapUserData: false,
+      userDataList: [
+        { name: 'em', value: hashedEmail },
+        { name: 'ph', value: 'undefined' },
+        { name: 'fn', value: 'null' }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.em).isEqualTo(hashedEmail);
+    assertThat(userData.ph).isUndefined();
+    assertThat(userData.fn).isUndefined();
+    assertApi('sha256Sync').wasNotCalled();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Normalization] Each user data field is normalized as required by Snap before hashing'
+  code: |-
+    [
+      { name: 'em', value: ' Jane@Example.COM ', expected: 'jane@example.com' },
+      { name: 'ph', value: '+1 (555) 123-4567', expected: '15551234567' },
+      { name: 'ph', value: '0044 844 412 4653', expected: '448444124653' },
+      { name: 'ph', value: 15551234567, expected: '15551234567' },
+      { name: 'fn', value: 'Raphaël', expected: 'raphaël' },
+      { name: 'fn', value: "O'Brien-Smith", expected: 'obriensmith' },
+      { name: 'fn', value: ' Mary Ann ', expected: 'mary ann' },
+      { name: 'ln', value: 'Andrews.', expected: 'andrews' },
+      { name: 'fn', value: 'O\u2019Brien', expected: 'obrien' },
+      { name: 'ln', value: 'Smith\u2013Jones', expected: 'smithjones' },
+      { name: 'ge', value: 'Female', expected: 'f' },
+      { name: 'ge', value: ' MALE ', expected: 'm' },
+      { name: 'ge', value: 'F', expected: 'f' },
+      { name: 'ct', value: 'Las Vegas', expected: 'lasvegas' },
+      { name: 'ct', value: 'New York', expected: 'newyork' },
+      { name: 'ct', value: "St. John's", expected: 'stjohns' },
+      { name: 'ct', value: 'San\u00a0Francisco', expected: 'sanfrancisco' },
+      { name: 'st', value: 'CA', expected: 'ca' },
+      { name: 'st', value: 'New South Wales', expected: 'newsouthwales' },
+      { name: 'zp', value: '98101', expected: '98101' },
+      { name: 'zp', value: '98101-1234', expected: '98101' },
+      { name: 'zp', value: ' SW1A 1AA ', expected: 'sw1a1aa' },
+      { name: 'zp', value: '98101\u20131234', expected: '98101' },
+      { name: 'country', value: ' US ', expected: 'us' },
+      { name: 'external_id', value: ' Ext_1 ', expected: 'ext_1' }
+    ].forEach((scenario) => {
+      resetState();
+      const copyMockData = createMockData({
+        autoMapUserData: false,
+        userDataList: [{ name: scenario.name, value: scenario.value }]
+      });
+
+      runCode(copyMockData);
+
+      assertThat(state.body.data[0].user_data[scenario.name]).isEqualTo('sha256_' + scenario.expected);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Normalization] Values that normalize to an empty string are dropped and madid is lowercased'
+  code: |-
+    mockEventData({ page_location: defaultPageLocation, madid: 'AB12-CD34' });
+    const copyMockData = createMockData({
+      userDataList: [
+        { name: 'ph', value: 'abc' },
+        { name: 'ct', value: ' - ' }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.ph).isUndefined();
+    assertThat(userData.ct).isUndefined();
+    assertThat(userData.madid).isEqualTo('ab12-cd34');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Normalization] Regex dependent fields are dropped when regex support is unavailable'
+  code: |-
+    mock('createRegex', () => null);
+    const copyMockData = createMockData({
+      autoMapUserData: false,
+      userDataList: [
+        { name: 'ph', value: '+1 555' },
+        { name: 'fn', value: 'Mary-Ann' },
+        { name: 'ln', value: 'Andrews' },
+        { name: 'ct', value: 'Las Vegas' },
+        { name: 'st', value: 'CA' },
+        { name: 'zp', value: '98101-1234' },
+        { name: 'em', value: ' Jane@Example.com ' },
+        { name: 'ge', value: 'Female' },
+        { name: 'country', value: ' US ' },
+        { name: 'external_id', value: ' Ext_1 ' }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.ph).isUndefined();
+    assertThat(userData.fn).isUndefined();
+    assertThat(userData.ln).isUndefined();
+    assertThat(userData.ct).isUndefined();
+    assertThat(userData.st).isUndefined();
+    assertThat(userData.zp).isUndefined();
+    assertThat(userData.em).isEqualTo('sha256_jane@example.com');
+    assertThat(userData.ge).isEqualTo('sha256_f');
+    assertThat(userData.country).isEqualTo('sha256_us');
+    assertThat(userData.external_id).isEqualTo('sha256_ext_1');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Hashing] Arrays of user data values are normalized and hashed element by element'
+  code: |-
+    const hashedValue = 'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9';
+    const copyMockData = createMockData({
+      autoMapUserData: false,
+      userDataList: [
+        { name: 'em', value: [' Jane@Example.com ', 'JOHN@example.com', hashedValue] },
+        { name: 'ph', value: ['+1 (555) 123-4567', '0044 844 412 4653'] },
+        { name: 'ct', value: ['Las Vegas', 'New York'] },
+        { name: 'custom_field', value: ['Plain Value', 'Other'] }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.em).isEqualTo(['sha256_jane@example.com', 'sha256_john@example.com', hashedValue]);
+    assertThat(userData.ph).isEqualTo(['sha256_15551234567', 'sha256_448444124653']);
+    assertThat(userData.ct).isEqualTo(['sha256_lasvegas', 'sha256_newyork']);
+    assertThat(userData.custom_field).isEqualTo(['Plain Value', 'Other']);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Hashing] Array elements that normalize to empty are dropped and an all-empty array is omitted'
+  code: |-
+    const copyMockData = createMockData({
+      autoMapUserData: false,
+      userDataList: [
+        { name: 'ph', value: ['+1 555 123 4567', 'abc'] },
+        { name: 'em', value: ['jane@example.com', ' ', 'undefined'] },
+        { name: 'ct', value: ['-', ' . '] },
+        { name: 'zp', value: [] }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.ph).isEqualTo(['sha256_15551234567']);
+    assertThat(userData.em).isEqualTo(['sha256_jane@example.com']);
+    assertThat(userData.ct).isUndefined();
+    assertThat(userData.zp).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Hashing] Arrays from event data are automapped, normalized and hashed'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      email: ['Jane@Example.com', ' john@example.com '],
+      phone: ['+1 555 123 4567', '+44 844 412 4653'],
+      city: ['San Francisco'],
+      external_id: ['Ext_1', 'Ext_2']
     });
 
     runCode(mockData);
-- name: Browser ID parameter is NOT auto-generated and is NOT set on the request if
-    it no other sources contains its value and if checkbox is enabled
-  code: |-
-    mockData.notSetBrowserIdCookie = true;
 
-    mock('getAllEventData', {
-      event_name: 'purchase',
-      eventConversionType: 'WEB'
+    const userData = state.body.data[0].user_data;
+    assertThat(userData.em).isEqualTo(['sha256_jane@example.com', 'sha256_john@example.com']);
+    assertThat(userData.ph).isEqualTo(['sha256_15551234567', 'sha256_448444124653']);
+    assertThat(userData.ct).isEqualTo(['sha256_sanfrancisco']);
+    assertThat(userData.external_id).isEqualTo(['sha256_ext_1', 'sha256_ext_2']);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Click ID] Click ID is sourced by priority and the URL parameter wins'
+  code: |-
+    [
+      { eventData: { click_id: 'from_click_id' }, cookie: undefined, expected: 'from_click_id' },
+      { eventData: { scclid: 'from_scclid' }, cookie: undefined, expected: 'from_scclid' },
+      { eventData: { _scclid: 'from_underscore' }, cookie: undefined, expected: 'from_underscore' },
+      {
+        eventData: { common_cookie: { _scclid: 'from_common_cookie' }, click_id: 'ignored' },
+        cookie: undefined,
+        expected: 'from_common_cookie'
+      },
+      {
+        eventData: { common_cookie: { _scclid: 'ignored' } },
+        cookie: 'from_cookie',
+        expected: 'from_cookie'
+      },
+      {
+        eventData: { page_location: 'https://www.example.com/?ScCid=from_url', click_id: 'ignored' },
+        cookie: 'ignored',
+        expected: 'from_url'
+      }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      state.requestCookies._scclid = scenario.cookie;
+
+      runCode(mockData);
+
+      assertThat(state.body.data[0].user_data.sc_click_id).isEqualTo(scenario.expected);
+      assertThat(state.cookies._scclid.value).isEqualTo(scenario.expected);
     });
 
-    mock('sendHttpRequest', (url, callback, headers, body) => {
-      const bodyParsed = JSON.parse(body);
-      assertThat(bodyParsed.data[0].user_data.sc_cookie1).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Browser ID] Browser ID is sourced by priority or auto-generated for web'
+  code: |-
+    [
+      { eventData: { scid: 'from_scid' }, cookie: undefined, overrides: {}, expected: 'from_scid' },
+      { eventData: { _scid: 'from_underscore' }, cookie: undefined, overrides: {}, expected: 'from_underscore' },
+      {
+        eventData: { common_cookie: { _scid: 'from_common_cookie' }, _scid: 'ignored' },
+        cookie: undefined,
+        overrides: {},
+        expected: 'from_common_cookie'
+      },
+      {
+        eventData: { common_cookie: { _scid: 'ignored' } },
+        cookie: 'from_cookie',
+        overrides: {},
+        expected: 'from_cookie'
+      },
+      { eventData: {}, cookie: undefined, overrides: {}, expected: '55555555-5555-4555-5555-555555555555' },
+      {
+        eventData: {},
+        cookie: undefined,
+        overrides: { eventConversionType: 'MOBILE_APP', snapAppId: 'app123' },
+        expected: undefined
+      }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      state.requestCookies._scid = scenario.cookie;
+
+      runCode(createMockData(scenario.overrides));
+
+      assertThat(state.body.data[0].user_data.sc_cookie1).isEqualTo(scenario.expected);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Cookies] Click ID and Browser ID cookies are set with the default options'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      click_id: 'click_1',
+      _scid: 'scid_1'
+    });
+    const expectedOptions = {
+      domain: 'example.com',
+      path: '/',
+      samesite: 'Lax',
+      secure: true,
+      'max-age': 31536000,
+      httpOnly: false
+    };
+
+    runCode(mockData);
+
+    assertThat(state.domainInput).isEqualTo(defaultPageLocation);
+    assertThat(state.cookies._scclid.value).isEqualTo('click_1');
+    assertThat(state.cookies._scclid.options).isEqualTo(expectedOptions);
+    assertThat(state.cookies._scid.value).isEqualTo('scid_1');
+    assertThat(state.cookies._scid.options).isEqualTo(expectedOptions);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Cookies] Cookie domain, SameSite and HttpOnly options'
+  code: |-
+    [
+      {
+        overrides: { cookieDomain: 'custom.com', cookieSameSite: 'strict', useHttpOnlyCookie: true },
+        expected: { domain: 'custom.com', samesite: 'strict', httpOnly: true }
+      },
+      {
+        overrides: { cookieSameSite: 'none', useHttpOnlyCookie: 'true' },
+        expected: { domain: 'example.com', samesite: 'none', httpOnly: true }
+      },
+      {
+        overrides: { cookieDomain: 'auto', cookieSameSite: 'lax', useHttpOnlyCookie: false },
+        expected: { domain: 'example.com', samesite: 'lax', httpOnly: false }
+      },
+      {
+        overrides: { useHttpOnlyCookie: 'false' },
+        expected: { domain: 'example.com', samesite: 'Lax', httpOnly: false }
+      },
+      {
+        overrides: { cookieDomain: '' },
+        expected: { domain: 'example.com', samesite: 'Lax', httpOnly: false }
+      }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData({ page_location: defaultPageLocation, click_id: 'click_1' });
+
+      runCode(createMockData(scenario.overrides));
+
+      const options = state.cookies._scclid.options;
+      assertThat(options.domain).isEqualTo(scenario.expected.domain);
+      assertThat(options.samesite).isEqualTo(scenario.expected.samesite);
+      assertThat(options.httpOnly).isEqualTo(scenario.expected.httpOnly);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Cookies] Automatic cookie domain falls back to the referer and then to auto'
+  code: |-
+    [
+      {
+        eventData: { click_id: 'click_1' },
+        headers: { referer: 'https://referer.example.com/path' },
+        mockedDomain: 'example.com',
+        expectedInput: 'https://referer.example.com/path',
+        expectedDomain: 'example.com'
+      },
+      {
+        eventData: { click_id: 'click_1', page_location: defaultPageLocation },
+        headers: {},
+        mockedDomain: undefined,
+        expectedInput: defaultPageLocation,
+        expectedDomain: 'auto'
+      }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      state.headers = scenario.headers;
+      mock('computeEffectiveTldPlusOne', (url) => {
+        state.domainInput = url;
+        return scenario.mockedDomain;
+      });
+
+      runCode(mockData);
+
+      assertThat(state.domainInput).isEqualTo(scenario.expectedInput);
+      assertThat(state.cookies._scclid.options.domain).isEqualTo(scenario.expectedDomain);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Cookies] Click ID cookie is not set when the checkbox is enabled but the ID is still sent'
+  code: |-
+    mockEventData({ page_location: defaultPageLocation, click_id: 'click_1', _scid: 'scid_1' });
+    const copyMockData = createMockData({ notSetClickIdCookie: true });
+
+    runCode(copyMockData);
+
+    assertThat(state.body.data[0].user_data.sc_click_id).isEqualTo('click_1');
+    assertThat(state.cookies._scclid).isUndefined();
+    assertThat(state.cookies._scid.value).isEqualTo('scid_1');
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Cookies] Browser ID cookie is not set or auto-generated when the checkbox is enabled'
+  code: |-
+    [
+      { eventData: { _scid: 'scid_1' }, expected: 'scid_1' },
+      { eventData: {}, expected: undefined }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      const copyMockData = createMockData({ notSetBrowserIdCookie: true });
+
+      runCode(copyMockData);
+
+      assertThat(state.body.data[0].user_data.sc_cookie1).isEqualTo(scenario.expected);
+      assertThat(state.cookies._scid).isUndefined();
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Custom Data] Automapping a single item and the event level fields'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      transaction_id: 'tx_1',
+      search_term: 'shoes',
+      predicted_ltv: 50,
+      sign_up_method: 'google',
+      brands: ['brand_1'],
+      items: [
+        {
+          item_id: 'sku_1',
+          item_name: 'Shoe',
+          item_category: 'Shoes',
+          price: '10',
+          quantity: 2,
+          currency: 'EUR',
+          delivery_category: 'home_delivery'
+        }
+      ]
     });
 
     runCode(mockData);
-- name: Browser ID cookie must be set if checkbox is disabled
+
+    const customData = state.body.data[0].custom_data;
+    assertThat(customData.content_type).isEqualTo('product');
+    assertThat(customData.num_items).isEqualTo(1);
+    assertThat(customData.content_name).isEqualTo('Shoe');
+    assertThat(customData.content_category).isEqualTo('Shoes');
+    assertThat(customData.content_ids).isEqualTo('sku_1');
+    assertThat(customData.contents).isEqualTo([
+      { id: 'sku_1', quantity: 2, delivery_category: 'home_delivery', item_price: 10 }
+    ]);
+    assertThat(customData.currency).isEqualTo('EUR');
+    assertThat(customData.search_string).isEqualTo('shoes');
+    assertThat(customData.order_id).isEqualTo('tx_1');
+    assertThat(customData.predicted_ltv).isEqualTo(50);
+    assertThat(customData.sign_up_method).isEqualTo('google');
+    assertThat(customData.brands).isEqualTo(['brand_1']);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Custom Data] Automapping multiple items, ecommerce items, item id key and value'
   code: |-
-    const scidValue = 'scid';
-    mock('getAllEventData', {
-      event_name: 'purchase',
-      eventConversionType: 'WEB',
-      _scid: scidValue,
-      //click_id: 'clickid'
+    const ecommerceItems = [
+      { id: 'a', quantity: 1, price: 5 },
+      { id: 'b', price: 7 }
+    ];
+
+    [
+      { eventData: { ecommerce: { items: ecommerceItems }, value: 99, currency: 'USD' }, expectedValue: 99 },
+      { eventData: { items: ecommerceItems, 'x-ga-mp1-ev': 42 }, expectedValue: 42 }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+      const copyMockData = createMockData({ itemIdKey: 'id' });
+
+      runCode(copyMockData);
+
+      const customData = state.body.data[0].custom_data;
+      assertThat(customData.num_items).isEqualTo(2);
+      assertThat(customData.content_name).isUndefined();
+      assertThat(customData.content_ids).isUndefined();
+      assertThat(customData.contents).isEqualTo([
+        { id: 'a', quantity: 1, item_price: 5 },
+        { id: 'b', item_price: 7 }
+      ]);
+      assertThat(customData.value).isEqualTo(scenario.expectedValue);
     });
 
-    mock('setCookie', (name, value, options, encode) => {
-      assertThat(name).isEqualTo('_scid');
-      assertThat(value).isEqualTo(scidValue);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Custom Data] Purchase events get a default currency and value when they are missing'
+  code: |-
+    const twoItems = [
+      { item_id: 'a', quantity: 2, price: 5 },
+      { item_id: 'b', price: 7 }
+    ];
+
+    [
+      { overrides: { eventType: 'standard', eventNameStandard: 'PURCHASE' }, eventData: {}, expected: { currency: 'USD', value: 0 } },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'purchase' }, expected: { currency: 'USD', value: 0 } },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'purchase', items: twoItems }, expected: { currency: 'USD', value: 17 } },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'purchase', value: 99, currency: 'EUR' }, expected: { currency: 'EUR', value: 99 } },
+      { overrides: { eventType: 'inherit' }, eventData: { event_name: 'page_view' }, expected: { currency: undefined, value: undefined } }
+    ].forEach((scenario) => {
+      resetState();
+      mockEventData(scenario.eventData);
+
+      runCode(createMockData(scenario.overrides));
+
+      const customData = state.body.data[0].custom_data;
+      assertThat(customData.currency).isEqualTo(scenario.expected.currency);
+      assertThat(customData.value).isEqualTo(scenario.expected.value);
     });
 
-    runCode(mockData);
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[Custom Data] Automapping disabled keeps only the valid manual values'
+  code: |-
+    mockEventData({
+      page_location: defaultPageLocation,
+      value: 10,
+      currency: 'USD',
+      items: [{ item_id: 'sku_1', price: 10 }]
+    });
+    const copyMockData = createMockData({
+      autoMapCustomData: false,
+      customDataList: [
+        { name: 'custom_key', value: 'custom_value' },
+        { name: 'empty_key', value: '' },
+        { name: 'undefined_string_key', value: 'undefined' },
+        { name: 'null_string_key', value: 'null' },
+        { name: 'null_key', value: null },
+        { name: 'nan_key', value: 0 / 0 },
+        { name: 'zero_key', value: 0 },
+        { name: 'false_key', value: false }
+      ]
+    });
+
+    runCode(copyMockData);
+
+    assertThat(state.body.data[0].custom_data).isEqualTo({
+      custom_key: 'custom_value',
+      zero_key: 0,
+      false_key: false
+    });
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[App Data] Automapping for mobile app events and manual overrides'
+  code: |-
+    mockEventData({
+      app_data: { app_id: 'auto_app_id', extinfo: ['i2'], advertiser_tracking_enabled: 1 }
+    });
+    const baseOverrides = { eventConversionType: 'MOBILE_APP', snapAppId: 'snap_app_1' };
+
+    [
+      {
+        overrides: {},
+        expected: { app_id: 'auto_app_id', extinfo: ['i2'], advertiser_tracking_enabled: 1 }
+      },
+      {
+        overrides: { appId: 'manual_app_id', appDataList: [{ name: 'custom', value: 'x' }] },
+        expected: {
+          app_id: 'manual_app_id',
+          extinfo: ['i2'],
+          advertiser_tracking_enabled: 1,
+          custom: 'x'
+        }
+      },
+      {
+        overrides: {
+          autoMapAppData: false,
+          appDataList: [{ name: 'custom', value: 'x' }, { name: 'empty', value: '' }]
+        },
+        expected: { custom: 'x' }
+      }
+    ].forEach((scenario) => {
+      resetState();
+      const copyMockData = createMockData(baseOverrides);
+      Object.keys(scenario.overrides).forEach((key) => {
+        copyMockData[key] = scenario.overrides[key];
+      });
+
+      runCode(copyMockData);
+
+      assertThat(state.body.data[0].action_source).isEqualTo('MOBILE_APP');
+      assertThat(state.body.data[0].app_data).isEqualTo(scenario.expected);
+    });
+
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
+- name: '[App Data] App data is not added for web events'
+  code: |-
+    mockEventData({ page_location: defaultPageLocation, app_data: { app_id: 'auto_app_id' } });
+    const copyMockData = createMockData({ appId: 'manual_app_id' });
+
+    runCode(copyMockData);
+
+    assertThat(state.body.data[0].app_data).isUndefined();
+    assertApi('gtmOnSuccess').wasCalled();
+    assertApi('gtmOnFailure').wasNotCalled();
 setup: |-
-  const setCookie = require('setCookie');
   const JSON = require('JSON');
-  const Promise = require('Promise');
+  const Object = require('Object');
 
-  const requiredConsoleKeys = ['Type', 'TraceId', 'Name'];
-  const requiredBqKeys = ['timestamp', 'type', 'trace_id', 'tag_name'];
-
-  const expectedValue = 'test';
-  const expectedBqOptions = { ignoreUnknownValues: true };
   const expectedPixelId = '1111111111111';
+  const expectedAccessToken = 'test_token';
+  const defaultPageLocation = 'https://www.example.com/page';
 
-  const mockData = {
-    pixelId: expectedPixelId,
-    accessToken: expectedValue,
-    eventType: 'custom',
-    eventName: expectedValue,
-    logBigQueryProjectId: expectedValue,
-    logBigQueryDatasetId: expectedValue,
-    logBigQueryTableId: expectedValue,
+  const state = {};
+  const resetState = () => {
+    state.requestCount = 0;
+    state.url = undefined;
+    state.options = undefined;
+    state.body = undefined;
+    state.cookies = {};
+    state.requestCookies = {};
+    state.headers = {};
+    state.domainInput = undefined;
+    state.hashOptions = undefined;
+  };
+  resetState();
+
+  const createMockData = (overrides) => {
+    const result = {
+      pixelId: expectedPixelId,
+      accessToken: expectedAccessToken,
+      eventConversionType: 'WEB',
+      eventType: 'custom',
+      eventNameCustom: 'test_event'
+    };
+    Object.keys(overrides || {}).forEach((key) => {
+      result[key] = overrides[key];
+    });
+    return result;
   };
 
-  mock('sendHttpRequest', (url, callback, options, body) => {
-    callback(200);
-  });
+  const mockData = createMockData();
 
-  mock('getRequestHeader', (header) => {
-    if (header === 'trace-id') return 'expectedTraceId';
+  const mockEventData = (eventData) => {
+    mock('getAllEventData', () => eventData);
+  };
+
+  const mockSendHttpRequest = (statusCode) => {
+    mock('sendHttpRequest', (url, callback, options, body) => {
+      state.requestCount++;
+      state.url = url;
+      state.options = options;
+      state.body = JSON.parse(body);
+      callback(statusCode);
+    });
+  };
+
+  mockEventData({ page_location: defaultPageLocation });
+  mockSendHttpRequest(200);
+
+  mock('getRequestHeader', (name) => state.headers[name]);
+  mock('getCookieValues', (name) => (state.requestCookies[name] ? [state.requestCookies[name]] : []));
+  mock('setCookie', (name, value, options) => {
+    state.cookies[name] = { value: value, options: options };
+  });
+  mock('getTimestampMillis', () => 1700000000400);
+  mock('generateRandom', () => 5);
+  mock('sha256Sync', (input, options) => {
+    state.hashOptions = options;
+    return 'sha256_' + input;
+  });
+  mock('computeEffectiveTldPlusOne', (url) => {
+    state.domainInput = url;
+    return url ? 'example.com' : undefined;
   });
 
 
 ___NOTES___
+
+2026-10-20 - Change Notes:
+  - Move the cookie fields into a dedicated "Cookie Settings" section and add Cookie Domain (auto by default, resolved from page_location or the Referer header) and Cookie SameSite (lax by default); "Use HttpOnly cookies" is now a dropdown that accepts variables, and previously saved values keep working. Test Mode now comes before Use Optimistic Scenario
+  - Fix user data normalization before hashing as required by Snap: phone keeps digits only, names lose punctuation, gender becomes f/m, city and state lose spaces and punctuation, ZIP loses separators (US ZIP+4 is cut to 5 digits), madid is lowercased, and values that normalize to empty are no longer sent. Array values drop elements that normalize to empty instead of sending null. Hashes of values containing spaces or punctuation will change
+  - Normalization uses createRegex; if Re2 is unavailable, the fields that depend on it (ph, fn, ln, ct, st, zp) are not sent instead of being hashed without normalization
+  - Fix the Purchase defaults, which never applied: PURCHASE events without currency or value now send currency USD and a value summed from the items (or 0)
+  - Ignore the strings "undefined" and "null" in the manual parameter lists, and rewrite the unit tests to cover the whole template
 
 2026-06-29 Change Notes:
  - Logging removal.
