@@ -1,6 +1,8 @@
 homepage: 'https://stape.io/'
 documentation: 'https://github.com/stape-io/snapchat-tag'
 versions:
+  - sha: 053cb6f84f5e26aa738e2a9aa6bc1482827febea
+    changeNotes: Fix common_cookie parameter name in help texts.
   - sha: 2486256ba5406eecaecf55f0bdd76781e52552c9
     changeNotes: Cookie settings section, user data normalization fixes and Purchase defaults.
   - sha: 9791a84652b1e914c191eb2495b3ead73b134bed
